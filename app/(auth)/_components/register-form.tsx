@@ -3,8 +3,14 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, RegisterType } from "@/app/(auth)/schema";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 
 export default function RegisterForm() {
+
+  const router = useRouter();
+  const [pending, setTransition] = useTransition();
+
   const {
     register,
     handleSubmit,
@@ -21,6 +27,10 @@ export default function RegisterForm() {
   });
 
   const onSubmit = async (data: RegisterType) => {
+    setTransition(async () => {
+        await new Promise((resolve) => setTimeout(resolve,1000));
+        router.push('/login')
+    })
     console.log("register data:", data);
   };
 
@@ -93,10 +103,10 @@ export default function RegisterForm() {
 
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || pending }
         className="w-full mt-10 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-lg font-semibold text-white bg-[#233041] hover:bg-[#1f2c39] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#233041] disabled:opacity-50"
       >
-        {isSubmitting ? "Signing up..." : "Sign Up"}
+        {isSubmitting || pending ? "Signing up..." : "Sign Up"}
       </button>
     </form>
   );
