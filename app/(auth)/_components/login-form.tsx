@@ -3,8 +3,13 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginType } from "@/app/(auth)/schema";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 
 export default function LoginForm() {
+  const router = useRouter();
+  const [pending, setTransition] = useTransition();
+
   const {
     register,
     handleSubmit,
@@ -18,12 +23,16 @@ export default function LoginForm() {
     mode: "onSubmit",
   });
 
-  const onSubmit = async (data: LoginType) => {
+  const submit = async (data: LoginType) => {
+    setTransition(async () => {
+        await new Promise((resolve) => setTimeout(resolve,1000));
+        router.push('/dashboard')
+    })
     console.log("login data:", data);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(submit)} className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-400">
           Email
@@ -49,7 +58,7 @@ export default function LoginForm() {
           type="password"
           placeholder="Enter your password"
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
-          placeholder:text-gray-400 placeholder:text-sm"
+          text-black placeholder:text-gray-400 placeholder:text-sm"
         />
         {errors.password && (
           <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
@@ -71,10 +80,10 @@ export default function LoginForm() {
 
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || pending}
         className="w-full mt-10 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-lg font-semibold text-white bg-[#233041] hover:bg-[#1f2c39] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#233041] disabled:opacity-50"
       >
-        {isSubmitting ? "Logging in..." : "Login"}
+        {isSubmitting || pending ? "Logging in..." : "Login"}
       </button>
     </form>
   );
