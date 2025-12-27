@@ -46,7 +46,7 @@ export default function RegisterForm() {
             type="text"
             placeholder="Enter your name"
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
-            placeholder:text-gray-400 placeholder:text-sm"
+            placeholder:text-gray-400 placeholder:text-sm text-black"
             />
             {errors.name && (
             <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
@@ -62,7 +62,7 @@ export default function RegisterForm() {
           type="email"
           placeholder="Enter your email address"
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
-          placeholder:text-gray-400 placeholder:text-sm"
+          placeholder:text-gray-400 placeholder:text-sm text-black"
         />
         {errors.email && (
           <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
@@ -78,7 +78,7 @@ export default function RegisterForm() {
           type="password"
           placeholder="Enter your password"
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
-          placeholder:text-gray-400 placeholder:text-sm"
+          placeholder:text-gray-400 placeholder:text-sm text-black"
         />
         {errors.password && (
           <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
@@ -94,7 +94,7 @@ export default function RegisterForm() {
           type="password"
           placeholder="Enter your password again"
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
-          placeholder:text-gray-400 placeholder:text-sm"
+          placeholder:text-gray-400 placeholder:text-sm text-black"
         />
         {errors.confirmPassword && (
           <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
