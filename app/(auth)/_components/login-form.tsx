@@ -31,7 +31,7 @@ export default function LoginForm() {
       if(!res.success) {
         throw new Error(res.message || "Login Failed");
       }
-      setTransition(() => router.push("/"));
+      setTransition(() => router.push("/dashboard"));
     } catch(err: Error | any) {
       setError(err.response?.data?.message || err.message || "Login Failed");
     }
