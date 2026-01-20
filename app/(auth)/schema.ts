@@ -8,7 +8,7 @@ export const loginSchema = z.object({
 export type LoginType = z.infer<typeof loginSchema>;
 
 export const registerSchema = z.object({
-  name: z.string().trim().min(2, "Please enter your name").max(60, "Maximum limit is 60"),
+  fullName: z.string().trim().min(2, "Please enter your name").max(60, "Maximum limit is 60"),
   email: z.email("Enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string().min(6,"Password must be at least 6 characters"),
