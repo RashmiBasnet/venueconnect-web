@@ -4,7 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, RegisterType } from "@/app/(auth)/schema";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
+import { handleRegister } from "@/lib/actions/auth-actions";
 
 export default function RegisterForm() {
 
@@ -18,7 +19,7 @@ export default function RegisterForm() {
   } = useForm<RegisterType>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-        name: "",
+        fullName: "",
         email: "",
         password: "",
         confirmPassword: "",
@@ -26,12 +27,19 @@ export default function RegisterForm() {
     mode: "onSubmit",
   });
 
+  const [error, setError] = useState("");
+
   const onSubmit = async (data: RegisterType) => {
-    setTransition(async () => {
-        await new Promise((resolve) => setTimeout(resolve,1000));
-        router.push('/login')
-    })
-    console.log("register data:", data);
+    setError("");
+    try {
+      const res = await handleRegister(data);
+      if(!res.success){
+        throw new Error(res.message || "Failed to Register");
+      }
+      setTransition(() => router.push("/login"));
+    } catch(err:Error | any){
+            setError(err.message || "Failed to Register");
+    }
   };
 
   return (
@@ -42,14 +50,14 @@ export default function RegisterForm() {
             Name
             </label>
             <input
-            {...register("name")}
+            {...register("fullName")}
             type="text"
             placeholder="Enter your name"
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
             placeholder:text-gray-400 placeholder:text-sm text-black"
             />
-            {errors.name && (
-            <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+            {errors.fullName && (
+            <p className="mt-1 text-sm text-red-600">{errors.fullName.message}</p>
             )}
       </div>
 
