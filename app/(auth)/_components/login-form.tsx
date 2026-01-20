@@ -6,11 +6,14 @@ import { loginSchema, LoginType } from "@/app/(auth)/schema";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { handleLogin } from "@/lib/actions/auth-actions";
+import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginForm() {
   const router = useRouter();
   const [pending, setTransition] = useTransition();
   const [error, setError] = useState("");
+  const {checkAuth} = useAuth();
 
   const {
     register,
@@ -29,11 +32,13 @@ export default function LoginForm() {
     try {
       const res = await handleLogin(data);
       if(!res.success) {
-        throw new Error(res.message || "Login Failed");
+        throw new Error(res.message || "Failed to Login");
       }
+      await checkAuth();
+      toast.success("Login Successful! Redirecting to Dashboard..");
       setTransition(() => router.push("/dashboard"));
     } catch(err: Error | any) {
-      setError(err.response?.data?.message || err.message || "Login Failed");
+      toast.error(err.message || "Failed to Login");
     }
   };
 
