@@ -6,6 +6,7 @@ import { registerSchema, RegisterType } from "@/app/(auth)/schema";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { handleRegister } from "@/lib/actions/auth-actions";
+import { toast } from "sonner";
 
 export default function RegisterForm() {
 
@@ -36,9 +37,10 @@ export default function RegisterForm() {
       if(!res.success){
         throw new Error(res.message || "Failed to Register");
       }
+      toast.success("Successfully Registered! Redirecting to Login...");
       setTransition(() => router.push("/login"));
     } catch(err:Error | any){
-            setError(err.message || "Failed to Register");
+      toast.error(err.message || "Failed to Register");
     }
   };
 
