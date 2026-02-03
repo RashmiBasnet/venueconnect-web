@@ -29,15 +29,24 @@ export default function LoginForm() {
   });
 
   const submit = async (data: LoginType) => {
-    try {
+    try{
       const res = await handleLogin(data);
       if(!res.success) {
-        throw new Error(res.message || "Failed to Login");
+        throw new Error(res.message || "Login Failed");
       }
       await checkAuth();
-      toast.success("Login Successful! Redirecting to Dashboard..");
-      setTransition(() => router.push("/dashboard"));
-    } catch(err: Error | any) {
+      if (res.success) {
+        if (res.data?.role == 'admin') {
+          toast.success("Login Successful! Redirecting to Admin Home Page...");
+          return router.replace("/admin");
+        }
+        if (res.data?.role === 'user') {
+          toast.success("Login Successful! Redirecting to Home Page...");
+          return router.replace("/user/home");
+        }
+        return router.replace("/");
+      }
+    } catch (err: Error | any) {
       toast.error(err.message || "Failed to Login");
     }
   };
