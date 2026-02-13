@@ -21,13 +21,13 @@ export default function Sidebar() {
                 fixed md:static 
                 top-0 left-0 
                 h-screen w-64 
-                bg-yellow-600
+                bg-blue-950
                 border-r border-white dark:border-black/20
                 z-40 overflow-y-auto`}
             >
                 <div className="p-4 border-b border-white/20">
                     <Link href="/admin" className="flex items-center gap-3">
-                        <div className="relative h-10 w-10 overflow-hidden rounded-md bg-white/10">
+                        <div className="relative h-10 w-10 overflow-hidden rounded-md bg-white">
                         <Image
                             src="/images/logo_blue.png"
                             alt="Website Logo"

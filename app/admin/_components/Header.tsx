@@ -17,8 +17,8 @@ export default function Header() {
                             <Image
                             src = "/images/logo_blue.png"
                             alt = "Website Logo"
-                            width = {70}
-                            height = {70}
+                            width = {40}
+                            height = {40}
                             className=""
                             />
                             <span className="text-base text-black font-semibold tracking-tight group-hover:opacity-80 transition-opacity">
@@ -36,7 +36,7 @@ export default function Header() {
                                 onClick={() => {
                                     logout();
                                 }}
-                                className="w-full border flex items-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-yellow-600 rounded-md hover:bg-foreground/5 transition-colors text-left"
+                                className="w-full border flex items-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-yellow-600 rounded-md hover:bg-yellow-600/50 transition-colors text-left"
                             >
                                 Logout
                             </button>
