@@ -8,12 +8,16 @@ import { useState, useTransition } from "react";
 import { handleLogin } from "@/lib/actions/auth-actions";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
+import { Eye, EyeOff, Lock } from "lucide-react";
 
 export default function LoginForm() {
   const router = useRouter();
   const [pending, setTransition] = useTransition();
   const [error, setError] = useState("");
-  const {checkAuth} = useAuth();
+  const { checkAuth } = useAuth();
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -31,13 +35,24 @@ export default function LoginForm() {
   const submit = async (data: LoginType) => {
     try {
       const res = await handleLogin(data);
-      if(!res.success) {
-        throw new Error(res.message || "Failed to Login");
+      if (!res.success) {
+        throw new Error(res.message || "Login Failed");
       }
+
       await checkAuth();
-      toast.success("Login Successful! Redirecting to Dashboard..");
-      setTransition(() => router.push("/dashboard"));
-    } catch(err: Error | any) {
+
+      if (res.data?.role === "admin") {
+        toast.success("Login Successful! Redirecting to Admin Home Page...");
+        return router.replace("/admin");
+      }
+
+      if (res.data?.role === "user") {
+        toast.success("Login Successful! Redirecting to Home Page...");
+        return router.replace("/user/home");
+      }
+
+      return router.replace("/");
+    } catch (err: any) {
       toast.error(err.message || "Failed to Login");
     }
   };
@@ -45,9 +60,7 @@ export default function LoginForm() {
   return (
     <form onSubmit={handleSubmit(submit)} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-400">
-          Email
-        </label>
+        <label className="block text-sm font-medium text-gray-400">Email</label>
         <input
           {...register("email")}
           type="email"
@@ -64,29 +77,50 @@ export default function LoginForm() {
         <label className="block text-sm font-medium text-gray-400">
           Password
         </label>
-        <input
-          {...register("password")}
-          type="password"
-          placeholder="Enter your password"
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
-          text-black placeholder:text-gray-400 placeholder:text-sm"
-        />
+
+        <div className="mt-1 flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm
+          focus-within:outline-none focus-within:ring-indigo-500 focus-within:border-indigo-500">
+          <Lock className="h-4 w-4 text-gray-400" />
+
+          <input
+            {...register("password")}
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter your password"
+            className="w-full bg-transparent text-black placeholder:text-gray-400 placeholder:text-sm outline-none"
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowPassword((p) => !p)}
+            className="rounded-md p-1 text-gray-500 hover:bg-black/5"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
+
         {errors.password && (
-          <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+          <p className="mt-1 text-sm text-red-600">
+            {errors.password.message}
+          </p>
         )}
       </div>
 
       <div className="flex items-center justify-between">
         <div className="flex w-auto items-center text-center gap-1">
           <input
-          type="checkbox"
-          className="h-3 w-3 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+            type="checkbox"
+            className="h-3 w-3 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
           />
-          <label className=" block text-xs text-gray-500">
-            Remember me
-          </label>
+          <label className="block text-xs text-gray-500">Remember me</label>
         </div>
-        <label className="text-xs font-semibold text-[#A78E59]">Forgot password?</label>
+
+        <Link
+          href="/forgot-password"
+          className="text-xs font-semibold text-[#A78E59]"
+        >
+          Forgot password
+        </Link>
       </div>
 
       <button
