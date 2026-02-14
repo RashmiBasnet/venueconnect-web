@@ -6,15 +6,15 @@ import { revalidatePath } from "next/cache";
 
 export const handleGetProfile = async () => {
     try {
-        const result = await getProfile(); 
-        if(result.success) {
-            return { success: true, data: result.data}
+        const result = await getProfile();
+        if (result.success) {
+            return { success: true, data: result.data }
         }
         return {
             success: false,
             message: result.message || "Fetch WhoAmI Failed"
         }
-    } catch(err: Error | any) {
+    } catch (err: Error | any) {
         return {
             success: false,
             message: err.message || "Fetch WhoAmI Failed"
@@ -23,13 +23,13 @@ export const handleGetProfile = async () => {
 }
 
 export const handleUpdateUserProfile = async (formData: any) => {
-    try{
+    try {
         const result = await updateUserProfile(formData);
-        if(result.success){
+        if (result.success) {
             // update user data in cookie
             await setUserData(result.data);
             // revalidate user profile page
-            revalidatePath("/user/profile"); // refresh page date after update
+            revalidatePath("/user/update-profile");
             return {
                 success: true,
                 message: "Profile updated successfully",
@@ -40,7 +40,7 @@ export const handleUpdateUserProfile = async (formData: any) => {
             success: false,
             message: result.message || "Update profile failed"
         }
-    }catch(err: Error | any){
+    } catch (err: Error | any) {
         return {
             success: false,
             message: err.message || "Update profile failed"
@@ -51,7 +51,7 @@ export const handleUpdateUserProfile = async (formData: any) => {
 export const handleRequestPasswordReset = async (email: string) => {
     try {
         const response = await requestPasswordReset(email);
-        if(response.success) {
+        if (response.success) {
             return {
                 success: true,
                 message: "Password reset email sent successfully"

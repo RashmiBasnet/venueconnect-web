@@ -24,21 +24,35 @@ export default function Header() {
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-50 bg-[#CBBFB6]/90 backdrop-blur border-b border-black/10">
-      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between md:grid md:grid-cols-[1fr_auto_1fr]">
-          {/* LEFT: Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="relative h-9 w-9 rounded-md bg-white/60 ring-1 ring-black/10 overflow-hidden">
+    <header className="relative overflow-hidden h-50 bg-white">
+      {/* Background base color (so header still looks good while image loads) */}
+      <div className="absolute inset-0 " />
+
+      {/* Wave background */}
+      <div className="absolute inset-x-0 top-0 h-45 pointer-events-none">
+        <Image
+          src="/images/wave_decoration.png"
+          alt=""
+          fill
+          priority
+          className="object-contain object-top"
+        />
+      </div>
+
+      {/* Content on top */}
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-5">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-3">
+            <div className="relative h-10 w-10 overflow-hidden rounded-md bg-white/90 shadow-sm">
               <Image
                 src="/images/logo_blue.png"
                 alt="VenueConnect"
                 fill
                 className="object-contain p-1"
-                priority
               />
             </div>
-            <span className="text-sm font-semibold text-[#1F2A37]">
+            <span className="font-semibold tracking-tight text-[#233041]">
               Venue<span className="text-[#AE8E54]">Connect</span>
             </span>
           </Link>
@@ -73,8 +87,8 @@ export default function Header() {
                 className={
                   "px-3 py-2 rounded-md text-sm font-semibold transition " +
                   (pathname === "/login"
-                    ? "bg-white/60 text-[#1F2A37]"
-                    : "bg-white/40 text-[#1F2A37] hover:bg-white/55")
+                    ? "bg-white/70 text-[#1F2A37]"
+                    : "bg-white/50 text-[#1F2A37] hover:bg-white/65")
                 }
               >
                 Login
@@ -85,7 +99,7 @@ export default function Header() {
                 className={
                   "px-3 py-2 rounded-md text-sm font-semibold transition " +
                   (pathname === "/register"
-                    ? "bg-white/60 text-[#1F2A37]"
+                    ? "bg-white/70 text-[#1F2A37]"
                     : "bg-[#AE8E54] text-white hover:opacity-90")
                 }
               >
@@ -145,8 +159,8 @@ export default function Header() {
                   className={
                     "block px-3 py-2 rounded-md text-sm font-medium " +
                     (active
-                      ? "bg-white/50 text-[#1F2A37]"
-                      : "text-[#1F2A37]/75 hover:bg-white/40")
+                      ? "bg-white/60 text-[#1F2A37]"
+                      : "text-[#1F2A37]/80 hover:bg-white/45")
                   }
                 >
                   {link.label}
@@ -159,7 +173,7 @@ export default function Header() {
             <Link
               href="/login"
               onClick={() => setOpen(false)}
-              className="block px-3 py-2 rounded-md text-sm font-semibold bg-white/40 text-[#1F2A37] hover:bg-white/55"
+              className="block px-3 py-2 rounded-md text-sm font-semibold bg-white/50 text-[#1F2A37] hover:bg-white/65"
             >
               Login
             </Link>
@@ -173,7 +187,7 @@ export default function Header() {
             </Link>
           </div>
         </div>
-      </nav>
+      </div>
     </header>
   );
 }
