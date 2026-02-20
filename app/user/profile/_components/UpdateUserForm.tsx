@@ -28,7 +28,6 @@ function getProfilePictureSrc(profile?: string) {
     return `${apiBase}${UPLOADS_PATH}${profile}`;
 }
 
-/** VenueConnect theme classes */
 const labelCls = "text-sm font-semibold text-[#233041]";
 const errorCls = "mt-2 text-sm text-red-600";
 const fieldWrap =
@@ -47,8 +46,6 @@ export default function UpdateUserForm({ user }: { user: any }) {
 
     useEffect(() => setImgVersion(Date.now()), []);
 
-    // ✅ Use the backend field name for existing stored image too (you said it is "profile")
-    // If your user object stores it as user.profilePicture instead, just change this one line.
     const baseProfileSrc = useMemo(
         () => getProfilePictureSrc(user?.profile || user?.profilePicture),
         [user?.profile, user?.profilePicture]
@@ -133,7 +130,6 @@ export default function UpdateUserForm({ user }: { user: any }) {
             appendIf(formData, "fullName", data.fullName);
             appendIf(formData, "email", data.email);
 
-            // ✅ IMPORTANT: backend expects field name "profile"
             if (data.profilePicture) {
                 formData.append("profile", data.profilePicture);
             }

@@ -31,7 +31,6 @@ function makeAddressLine(v: Venue) {
 function getVenueImageUrl(file?: string) {
     if (!file) return "/images/placeholder-venue.jpg";
 
-    // already absolute
     if (file.startsWith("http")) return file;
 
     const base = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -40,8 +39,6 @@ function getVenueImageUrl(file?: string) {
         return "/images/placeholder-venue.jpg";
     }
 
-    // DB might store:
-    // "images-xxx.png" OR "/uploads/images-xxx.png"
     const cleaned = file.replace(/^\/+/, "");
 
     if (cleaned.startsWith("uploads/")) {
@@ -70,8 +67,8 @@ function VenueCard({ venue, reverse }: { venue: Venue; reverse?: boolean }) {
             ].join(" ")}
         >
             {/* Image */}
-            <div className="w-full md:w-[330px] shrink-0">
-                <div className="relative h-[220px] w-full overflow-hidden rounded-2xl border border-black/10 bg-gray-50">
+            <div className="w-full md:w-82.5 shrink-0">
+                <div className="relative h-55 w-full overflow-hidden rounded-2xl border border-black/10 bg-gray-50">
                     <Image
                         src={img}
                         alt={venue.name}

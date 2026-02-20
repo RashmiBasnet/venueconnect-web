@@ -21,7 +21,6 @@ export default function Header() {
 
     return (
         <header className="relative overflow-hidden h-50 bg-white">
-            {/* Background base color (so header still looks good while image loads) */}
             <div className="absolute inset-0 " />
 
             {/* Wave background */}

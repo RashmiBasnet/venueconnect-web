@@ -16,7 +16,6 @@ export const updateUserSchema = z.object({
         .min(1, "Email is required.")
         .email("Please enter a valid email address."),
 
-    // optional because user may not upload a new image every time
     profilePicture: z
         .any()
         .optional()

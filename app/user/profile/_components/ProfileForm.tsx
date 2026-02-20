@@ -14,14 +14,6 @@ export default function ProfileForm({
     user: any;
     onLogout?: () => void;
 }) {
-    /**
-     * user.profile          -> backend field (new)
-     * user.profilePicture   -> legacy / frontend field
-     * values can be:
-     *  - full URL
-     *  - "/uploads/xyz.png"
-     *  - "xyz.png"
-     */
     const rawProfile = user?.profile || user?.profilePicture || "";
 
     const profileSrc = rawProfile

@@ -9,31 +9,31 @@ export const getProfile = async () => {
         return response.data;
     } catch (err: Error | any) {
         throw new Error(
-            err.response?.data?.message 
-            || err.message 
-            || "Profile Fetch Failed" 
+            err.response?.data?.message
+            || err.message
+            || "Profile Fetch Failed"
         );
     }
 }
 
 export const updateUserProfile = async (updateData: any) => {
-    try{
+    try {
         const response = await axios.put(
             API.USER.UPDATE_PROFILE,
             updateData,
             {
                 headers: {
-                    'Content-Type': 'multipart/form-data' // IMPORTANT: for file upload/multer
+                    'Content-Type': 'multipart/form-data'
                 }
             }
         );
         return response.data;
-    } catch(err: Error | any){
+    } catch (err: Error | any) {
         throw new Error
             (
-                err.response?.data?.message  // from backend
-                || err.message // general error message
-                || "Update profile failed" // change
+                err.response?.data?.message
+                || err.message
+                || "Update profile failed"
             );
     }
 }
@@ -41,11 +41,11 @@ export const updateUserProfile = async (updateData: any) => {
 export const requestPasswordReset = async (email: string) => {
     try {
         const response = await axios.post(
-            API.USER.REQUEST_PASSWORD_RESET, 
+            API.USER.REQUEST_PASSWORD_RESET,
             { email }
         );
         return response.data;
-    } catch(error: Error | any){
+    } catch (error: Error | any) {
         throw new Error(error.response?.data?.message || error.message || 'Request password reset failed');
     }
 }
@@ -53,7 +53,7 @@ export const requestPasswordReset = async (email: string) => {
 export const resetPassword = async (token: string, newPassword: string) => {
     try {
         const response = await axios.post(
-            API.USER.RESET_PASSWORD(token), 
+            API.USER.RESET_PASSWORD(token),
             {
                 newPassword: newPassword
             }

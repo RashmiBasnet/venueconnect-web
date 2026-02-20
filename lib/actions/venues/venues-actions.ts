@@ -11,7 +11,6 @@ import {
 import { revalidatePath } from "next/cache";
 
 // PUBLIC ACTIONS
-
 export const handleGetAllVenues = async () => {
     try {
         const result = await getAllVenues();
@@ -49,7 +48,6 @@ export const handleGetVenueById = async (venueId: string) => {
 };
 
 // ADMIN ACTIONS
-
 export const handleCreateVenue = async (formData: FormData) => {
     try {
         const result = await createVenue(formData);
@@ -124,7 +122,6 @@ export const handleDeleteVenue = async (venueId: string) => {
 };
 
 // ADMIN IMAGE ACTIONS
-
 export const handleReplaceVenueImages = async (
     venueId: string,
     formData: FormData
