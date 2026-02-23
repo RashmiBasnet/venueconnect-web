@@ -30,13 +30,27 @@ export default function Header() {
 
       {/* Wave background */}
       <div className="absolute inset-x-0 top-0 h-45 pointer-events-none">
-        <Image
-          src="/images/wave_decoration.png"
-          alt=""
-          fill
-          priority
-          className="object-contain object-top"
-        />
+        <svg
+          className="h-full w-full"
+          viewBox="0 0 2048 255"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path
+            fill="#C4B6AB"
+            d="M 0 0 H 2048 V 205
+         L 2047 205 L 2016 223 L 1984 236 L 1952 245 L 1920 250 L 1888 254 L 1856 254
+         L 1824 254 L 1792 253 L 1760 251 L 1728 248 L 1696 244 L 1664 240 L 1632 235
+         L 1600 230 L 1568 224 L 1536 218 L 1504 211 L 1472 204 L 1440 197 L 1408 190
+         L 1376 184 L 1344 178 L 1312 172 L 1280 167 L 1248 162 L 1216 157 L 1184 153
+         L 1152 149 L 1120 146 L 1088 143 L 1056 141 L 1024 139 L 992 138 L 960 137
+         L 928 137 L 896 137 L 864 138 L 832 139 L 800 141 L 768 143 L 736 146 L 704 149
+         L 672 153 L 640 157 L 608 162 L 576 167 L 544 172 L 512 178 L 480 184 L 448 190
+         L 416 197 L 384 204 L 352 211 L 320 218 L 288 224 L 256 230 L 224 235 L 192 240
+         L 160 244 L 128 248 L 6 265 L 70 293 L 90 292 L -10 248
+         Z"
+          />
+        </svg>
       </div>
 
       {/* Content on top */}
