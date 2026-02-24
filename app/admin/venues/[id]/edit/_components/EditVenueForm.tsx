@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -7,7 +8,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import AddPackageForm from "./AddPackageForm";
-import { handleUpdateVenue } from "@/lib/actions/venues/venues-actions";
+import {
+    handleUpdateVenue,
+    handleReplaceVenueImages,
+} from "@/lib/actions/venues/venues-actions";
 import { handleDeletePackage } from "@/lib/actions/packages/packages-action";
 
 import {
@@ -30,16 +34,25 @@ type Package = {
 };
 
 function normalizeAmenities(val: unknown): string[] {
-    if (Array.isArray(val)) {
-        return val.map((s) => String(s).trim()).filter(Boolean);
-    }
-    if (typeof val === "string") {
+    if (Array.isArray(val)) return val.map((s) => String(s).trim()).filter(Boolean);
+    if (typeof val === "string")
         return val
             .split(",")
             .map((s) => s.trim())
             .filter(Boolean);
-    }
     return [];
+}
+
+function getVenueImageUrl(file?: string) {
+    if (!file) return "/images/placeholder-venue.jpg";
+    if (file.startsWith("http")) return file;
+
+    const base = process.env.NEXT_PUBLIC_API_BASE_URL;
+    if (!base) return "/images/placeholder-venue.jpg";
+
+    const cleaned = file.replace(/^\/+/, "");
+    if (cleaned.startsWith("uploads/")) return `${base}/${cleaned}`;
+    return `${base}/uploads/${cleaned}`;
 }
 
 export default function EditVenueForm({
@@ -92,9 +105,7 @@ export default function EditVenueForm({
                 minGuests: parsedVenue.capacity?.minGuests ?? 1,
                 maxGuests: parsedVenue.capacity?.maxGuests ?? 1,
             },
-
             amenities: parsedVenue.amenities ?? [],
-
             isActive: parsedVenue.isActive ?? true,
         },
         mode: "onSubmit",
@@ -102,6 +113,45 @@ export default function EditVenueForm({
 
     const [packages, setPackages] = useState<Package[]>(initialPackages || []);
     const [showAddPkg, setShowAddPkg] = useState(false);
+
+    // Image replace state
+    const [imgFiles, setImgFiles] = useState<File[]>([]);
+    const [imgPreviews, setImgPreviews] = useState<string[]>([]);
+    const [imgPending, setImgPending] = useState(false);
+
+    const onPickImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        setImgFiles(files);
+        setImgPreviews(files.map((f) => URL.createObjectURL(f)));
+    };
+
+    const onReplaceImages = async () => {
+        if (!imgFiles.length) {
+            toast.error("Please choose images first");
+            return;
+        }
+
+        const ok = confirm("Replace venue images? This will remove previous images.");
+        if (!ok) return;
+
+        const fd = new FormData();
+        imgFiles.forEach((f) => fd.append("images", f));
+
+        try {
+            setImgPending(true);
+            const res = await handleReplaceVenueImages(venueId, fd);
+            if (!res.success) throw new Error(res.message || "Failed to update images");
+
+            toast.success("Venue images updated");
+            setImgFiles([]);
+            setImgPreviews([]);
+            startTransition(() => router.refresh());
+        } catch (err: any) {
+            toast.error(err?.message || "Failed to update images");
+        } finally {
+            setImgPending(false);
+        }
+    };
 
     const onSubmitVenue = async (data: UpdateVenueType) => {
         const payload = {
@@ -118,9 +168,7 @@ export default function EditVenueForm({
                 minGuests: data.capacity.minGuests,
                 maxGuests: data.capacity.maxGuests,
             },
-
             amenities: normalizeAmenities((data as any).amenities),
-
             isActive: data.isActive,
         };
 
@@ -156,6 +204,7 @@ export default function EditVenueForm({
     };
 
     const isActive = watch("isActive");
+    const currentImages = Array.isArray(parsedVenue.images) ? parsedVenue.images : [];
 
     return (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.15fr_0.85fr]">
@@ -167,6 +216,83 @@ export default function EditVenueForm({
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmitVenue)} className="p-6 space-y-5">
+                    {/* IMAGES */}
+                    <div className="rounded-xl border border-black/10 bg-white">
+                        <div className="border-b border-black/10 px-4 py-3">
+                            <p className="text-sm font-bold text-[#233041]">Venue Images</p>
+                            <p className="text-xs text-slate-600">Replace all images for this venue.</p>
+                        </div>
+
+                        <div className="p-4 space-y-4">
+                            {/* Current images */}
+                            <div>
+                                <p className="text-xs font-semibold text-slate-700 mb-2">Current</p>
+                                {currentImages.length ? (
+                                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                                        {currentImages.slice(0, 6).map((img, i) => (
+                                            <div
+                                                key={`${img}-${i}`}
+                                                className="relative h-24 w-full overflow-hidden rounded-xl border border-black/10 bg-gray-50"
+                                            >
+                                                <Image
+                                                    src={getVenueImageUrl(img)}
+                                                    alt={`venue-${i}`}
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="160px"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="rounded-lg border border-black/10 bg-gray-50 p-3 text-xs text-slate-600">
+                                        No images uploaded yet.
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Pick new images */}
+                            <div>
+                                <p className="text-xs font-semibold text-slate-700 mb-2">New images</p>
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={onPickImages}
+                                    className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-[#233041] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:opacity-90"
+                                />
+
+                                {imgPreviews.length ? (
+                                    <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                                        {imgPreviews.map((src, i) => (
+                                            <div
+                                                key={`${src}-${i}`}
+                                                className="relative h-24 w-full overflow-hidden rounded-xl border border-black/10 bg-gray-50"
+                                            >
+                                                <img
+                                                    src={src}
+                                                    alt={`preview-${i}`}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : null}
+                            </div>
+
+                            {/* Replace button */}
+                            <button
+                                type="button"
+                                onClick={onReplaceImages}
+                                disabled={imgPending || pending}
+                                className="w-full rounded-lg bg-[#233041] px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60"
+                            >
+                                {imgPending ? "Replacing..." : "Replace Images"}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Venue Name */}
                     <div>
                         <label className="block text-sm font-semibold text-slate-700">Venue Name</label>
                         <input
@@ -176,6 +302,7 @@ export default function EditVenueForm({
                         {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
                     </div>
 
+                    {/* Description */}
                     <div>
                         <label className="block text-sm font-semibold text-slate-700">Description</label>
                         <textarea
@@ -277,7 +404,6 @@ export default function EditVenueForm({
                             placeholder="Parking, AC, WiFi"
                             className="mt-1 w-full rounded-lg text-black border border-black/10 px-4 py-2.5 text-sm"
                         />
-
                         {errors.amenities && (
                             <p className="mt-1 text-sm text-red-600">{errors.amenities.message as any}</p>
                         )}
@@ -349,7 +475,9 @@ export default function EditVenueForm({
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0">
                                         <p className="truncate text-sm font-bold text-[#233041]">{p.name}</p>
-                                        <p className="mt-1 text-xs text-slate-600 line-clamp-2">{p.description || "No description"}</p>
+                                        <p className="mt-1 text-xs text-slate-600 line-clamp-2">
+                                            {p.description || "No description"}
+                                        </p>
 
                                         <div className="mt-2 flex flex-wrap gap-2">
                                             <span className="rounded-full bg-[#FBF8F5] px-2.5 py-1 text-xs font-semibold text-[#B7795B] border border-[#E9E2DC]">
