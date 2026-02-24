@@ -1,25 +1,12 @@
 "use client";
 
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useTransition, useState } from "react";
-import { handleCreateVenue } from "@/lib/actions/venues/venues-actions";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
-
-type AddVenueFormType = {
-    name: string;
-    description?: string;
-    area?: string;
-    city: string;
-    country: string;
-    zipCode?: string;
-    baseType: "PER_PLATE" | "FLAT" | "PER_HOUR";
-    basePrice: string;
-    minGuests: string;
-    maxGuests: string;
-    amenities?: string;
-    isActive: boolean;
-};
+import { handleCreateVenue } from "@/lib/actions/venues/venues-actions";
+import { createVenueSchema, type CreateVenueType } from "../../schema/venue-schema";
 
 export default function AddVenueForm() {
     const router = useRouter();
@@ -28,23 +15,23 @@ export default function AddVenueForm() {
     const [images, setImages] = useState<File[]>([]);
     const [previews, setPreviews] = useState<string[]>([]);
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors, isSubmitting },
-    } = useForm<AddVenueFormType>({
+    const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<CreateVenueType>({
+        resolver: zodResolver(createVenueSchema) as any,
         defaultValues: {
             name: "",
             description: "",
-            area: "",
-            city: "Kathmandu",
-            country: "Nepal",
-            zipCode: "",
-            baseType: "PER_PLATE",
-            basePrice: "",
-            minGuests: "1",
-            maxGuests: "",
-            amenities: "",
+            address: {
+                area: "",
+                city: "Kathmandu",
+                country: "Nepal",
+                zipCode: "",
+            },
+            pricePerPlate: 0,
+            capacity: {
+                minGuests: 1,
+                maxGuests: 1,
+            },
+            amenities: [],
             isActive: true,
         },
         mode: "onSubmit",
@@ -56,206 +43,227 @@ export default function AddVenueForm() {
         setPreviews(files.map((f) => URL.createObjectURL(f)));
     };
 
-    const onSubmit = async (data: AddVenueFormType) => {
+    const onSubmit = async (data: CreateVenueType) => {
         const formData = new FormData();
 
+        // top-level
         formData.append("name", data.name);
         if (data.description) formData.append("description", data.description);
 
-        formData.append("address[area]", data.area || "");
-        formData.append("address[city]", data.city);
-        formData.append("address[country]", data.country);
-        if (data.zipCode) formData.append("address[zipCode]", data.zipCode);
+        // address
+        formData.append("address[area]", data.address.area || "");
+        formData.append("address[city]", data.address.city);
+        formData.append("address[country]", data.address.country);
+        if (data.address.zipCode) formData.append("address[zipCode]", data.address.zipCode);
 
-        formData.append("pricing[baseType]", data.baseType);
-        formData.append("pricing[basePrice]", data.basePrice);
-        formData.append("pricing[currency]", "NPR");
+        // new field
+        formData.append("pricePerPlate", String(data.pricePerPlate));
 
-        formData.append("capacity[minGuests]", data.minGuests);
-        formData.append("capacity[maxGuests]", data.maxGuests);
+        // capacity
+        formData.append("capacity[minGuests]", String(data.capacity.minGuests));
+        formData.append("capacity[maxGuests]", String(data.capacity.maxGuests));
 
-        if (data.amenities) formData.append("amenities", data.amenities);
+        if (data.amenities?.length) formData.append("amenities", data.amenities.join(", "));
+
+        // isActive
         formData.append("isActive", String(data.isActive));
 
-        images.forEach((file) => {
-            formData.append("images", file);
-        });
+        // files
+        images.forEach((file) => formData.append("images", file));
 
         startTransition(async () => {
-            const res = await handleCreateVenue(formData);
+            try {
+                const res = await handleCreateVenue(formData);
+                if (!res.success) throw new Error(res.message || "Failed to create venue");
 
-            if (!res.success) {
-                toast.error(res.message || "Failed to create venue");
-                return;
+                toast.success("Venue created successfully");
+                router.push("/admin/venues");
+                router.refresh();
+            } catch (err: any) {
+                toast.error(err.message || "Failed to create venue");
             }
-
-            toast.success("Venue created successfully");
-            router.push("/admin/venues");
-            router.refresh();
         });
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Venue Name */}
-            <div>
-                <label className="block text-sm font-medium text-gray-400">
-                    Venue Name
-                </label>
-                <input
-                    {...register("name", { required: "Venue name is required" })}
-                    className="mt-1 w-full rounded-md border px-3 py-2 text-black"
-                />
-                {errors.name && (
-                    <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-                )}
+        <section className="rounded-2xl border border-black/10 bg-white shadow-sm">
+            <div className="border-b border-black/10 px-6 py-4">
+                <h1 className="text-lg font-bold text-[#233041]">Add Venue</h1>
+                <p className="text-sm text-slate-600">Create a new venue.</p>
             </div>
 
-            {/* Description */}
-            <div>
-                <label className="block text-sm font-medium text-gray-400">
-                    Description
-                </label>
-                <textarea
-                    {...register("description")}
-                    rows={3}
-                    className="mt-1 w-full rounded-md border px-3 py-2 text-black"
-                />
-            </div>
-
-            {/* Images */}
-            <div>
-                <label className="block text-sm font-medium text-gray-400">
-                    Venue Images
-                </label>
-                <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImages}
-                    className="mt-2 text-sm"
-                />
-
-                {previews.length > 0 && (
-                    <div className="mt-3 grid grid-cols-3 gap-3">
-                        {previews.map((src, i) => (
-                            <img
-                                key={i}
-                                src={src}
-                                alt="preview"
-                                className="h-24 w-full rounded-md object-cover border"
-                            />
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            {/* Location */}
-            <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+                {/* Name */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-400">Area</label>
+                    <label className="block text-sm font-semibold text-slate-700">Venue Name</label>
                     <input
-                        {...register("area")}
-                        className="mt-1 w-full rounded-md border px-3 py-2 text-black"
+                        {...register("name")}
+                        className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm text-black outline-none focus:ring-2 focus:ring-yellow-100"
                     />
+                    {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
                 </div>
 
+                {/* Description */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-400">City</label>
-                    <input
-                        {...register("city")}
-                        className="mt-1 w-full rounded-md border px-3 py-2 text-black"
+                    <label className="block text-sm font-semibold text-slate-700">Description</label>
+                    <textarea
+                        {...register("description")}
+                        rows={4}
+                        className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm text-black outline-none focus:ring-2 focus:ring-yellow-100"
                     />
-                </div>
-            </div>
-
-            {/* Pricing */}
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-400">
-                        Pricing Type
-                    </label>
-                    <select
-                        {...register("baseType")}
-                        className="mt-1 w-full rounded-md border px-3 py-2 text-black"
-                    >
-                        <option value="PER_PLATE">Per Plate</option>
-                        <option value="FLAT">Flat</option>
-                        <option value="PER_HOUR">Per Hour</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-400">
-                        Base Price
-                    </label>
-                    <input
-                        type="number"
-                        {...register("basePrice", { required: "Base price is required" })}
-                        className="mt-1 w-full rounded-md border px-3 py-2 text-black"
-                    />
-                    {errors.basePrice && (
-                        <p className="mt-1 text-sm text-red-600">
-                            {errors.basePrice.message}
-                        </p>
+                    {errors.description && (
+                        <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
                     )}
                 </div>
-            </div>
 
-            {/* Capacity */}
-            <div className="grid grid-cols-2 gap-4">
+                {/* Images */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-400">
-                        Min Guests
-                    </label>
+                    <label className="block text-sm font-semibold text-slate-700">Venue Images</label>
                     <input
-                        type="number"
-                        {...register("minGuests")}
-                        className="mt-1 w-full rounded-md border px-3 py-2 text-black"
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImages}
+                        className="mt-2 block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-[#233041] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:opacity-90"
                     />
+
+                    {previews.length > 0 && (
+                        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                            {previews.map((src, i) => (
+                                <img
+                                    key={i}
+                                    src={src}
+                                    alt="preview"
+                                    className="h-24 w-full rounded-xl border border-black/10 object-cover"
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
 
+                {/* Address */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700">Area</label>
+                        <input
+                            {...register("address.area")}
+                            className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm text-black"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700">City</label>
+                        <input
+                            {...register("address.city")}
+                            className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm text-black"
+                        />
+                        {errors.address?.city && (
+                            <p className="mt-1 text-sm text-red-600">{errors.address.city.message}</p>
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700">Country</label>
+                        <input
+                            {...register("address.country")}
+                            className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm text-black"
+                        />
+                        {errors.address?.country && (
+                            <p className="mt-1 text-sm text-red-600">{errors.address.country.message}</p>
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700">Zip Code</label>
+                        <input
+                            {...register("address.zipCode")}
+                            className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm text-black"
+                        />
+                    </div>
+                </div>
+
+                {/* Capacity */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700">Min Guests</label>
+                        <input
+                            type="number"
+                            {...register("capacity.minGuests", { valueAsNumber: true })}
+                            className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm text-black"
+                        />
+                        {errors.capacity?.minGuests && (
+                            <p className="mt-1 text-sm text-red-600">{errors.capacity.minGuests.message}</p>
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700">Max Guests</label>
+                        <input
+                            type="number"
+                            {...register("capacity.maxGuests", { valueAsNumber: true })}
+                            className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm text-black"
+                        />
+                        {errors.capacity?.maxGuests && (
+                            <p className="mt-1 text-sm text-red-600">{errors.capacity.maxGuests.message}</p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Price Per Plate */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-400">
-                        Max Guests
-                    </label>
+                    <label className="block text-sm font-semibold text-slate-700">Price Per Plate</label>
                     <input
                         type="number"
-                        {...register("maxGuests", { required: "Max guests is required" })}
-                        className="mt-1 w-full rounded-md border px-3 py-2 text-black"
+                        {...register("pricePerPlate", { valueAsNumber: true })}
+                        className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm text-black"
                     />
+                    {errors.pricePerPlate && (
+                        <p className="mt-1 text-sm text-red-600">{errors.pricePerPlate.message}</p>
+                    )}
                 </div>
-            </div>
 
-            {/* Amenities */}
-            <div>
-                <label className="block text-sm font-medium text-gray-400">
-                    Amenities
-                </label>
-                <input
-                    {...register("amenities")}
-                    placeholder="Parking, AC, WiFi"
-                    className="mt-1 w-full rounded-md border px-3 py-2 text-black"
-                />
-            </div>
+                {/* Amenities */}
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700">Amenities</label>
+                    <input
+                        {...register("amenities")}
+                        placeholder="Parking, AC, WiFi"
+                        className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm text-black"
+                    />
+                    {errors.amenities && (
+                        <p className="mt-1 text-sm text-red-600">{errors.amenities.message as any}</p>
+                    )}
+                </div>
 
-            {/* Active */}
-            <div className="flex items-center gap-2">
-                <input
-                    type="checkbox"
-                    {...register("isActive")}
-                    className="h-4 w-4"
-                />
-                <span className="text-sm text-gray-600">Venue is active</span>
-            </div>
+                {/* Active */}
+                <div className="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        {...register("isActive")}
+                        className="h-4 w-4 accent-yellow-600"
+                    />
+                    <span className="text-sm text-slate-700">Venue is active</span>
+                </div>
 
-            <button
-                type="submit"
-                disabled={isSubmitting || pending}
-                className="w-full mt-6 rounded-md bg-[#233041] py-2 text-lg font-semibold text-white hover:bg-[#1f2c39] disabled:opacity-50"
-            >
-                {isSubmitting || pending ? "Creating..." : "Create Venue"}
-            </button>
-        </form>
+                {/* Actions */}
+                <div className="flex items-center justify-end gap-3 pt-2">
+                    <button
+                        type="button"
+                        onClick={() => router.back()}
+                        className="rounded-lg border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-gray-500 hover:underline"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        disabled={isSubmitting || pending}
+                        className="rounded-lg bg-[#233041] px-5 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60"
+                    >
+                        {isSubmitting || pending ? "Creating..." : "Create Venue"}
+                    </button>
+                </div>
+            </form>
+        </section>
     );
 }
