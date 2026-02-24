@@ -35,7 +35,8 @@ export const getAllPackages = async ({
     search?: string;
 }) => {
     try {
-        const response = await axios.get(API.ADMIN.PACKAGES.GET_ALL, {
+        const response = await axios.get(
+            API.PACKAGES.GET_ALL, {
             params: { page, size, search },
         });
         return response.data;

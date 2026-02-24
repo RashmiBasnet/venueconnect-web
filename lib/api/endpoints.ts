@@ -17,7 +17,6 @@ export const API = {
             REPLACE_IMAGES: (id: string) => `/api/admin/venues/${id}/images`,
         },
         PACKAGES: {
-            GET_ALL: "/api/admin/packages",
             CREATE: "/api/admin/packages",
             GET_BY_ID: (id: string) => `/api/admin/packages/${id}`,
             UPDATE: (id: string) => `/api/admin/packages/${id}`,
@@ -36,6 +35,7 @@ export const API = {
         GET_BY_ID: (id: string) => `/api/venues/${id}`,
     },
     PACKAGES: {
+        GET_ALL: "/api/packages",
         GET_BY_VENUE: (venueId: string) => `/api/packages/venue/${venueId}`,
         GET_BY_ID: (id: string) => `/api/packages/${id}`,
     },

@@ -60,14 +60,15 @@ export const handleGetAllPackages = async ({
     try {
         const result = await getAllPackages({ page, size, search });
         if (result.success) {
+            const p = result.pagination || {};
             return {
                 success: true,
-                packages: result.data.packages,
+                packages: result.data,
                 pagination: {
-                    page,
-                    size,
-                    total: result.data.totalPackages,
-                    totalPages: Math.ceil(result.data.totalPackages / size),
+                    page: Number(p.page ?? page),
+                    size: Number(p.size ?? size),
+                    total: Number(p.totalItems ?? 0),
+                    totalPages: Number(p.totalPages ?? 1),
                 },
             };
         }
