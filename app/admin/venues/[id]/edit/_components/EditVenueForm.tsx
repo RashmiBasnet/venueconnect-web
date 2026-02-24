@@ -3,107 +3,140 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import AddPackageForm from "./AddPackageForm";
-import {
-    handleUpdateVenue,
-} from "@/lib/actions/venues/venues-actions";
-import {
-    handleDeletePackage,
-} from "@/lib/actions/packages/packages-action";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type Venue = {
-    _id: string;
-    name: string;
-    description?: string;
-    address?: { area?: string; city?: string; country?: string; zipCode?: string };
-    pricing?: { baseType?: "PER_PLATE" | "FLAT" | "PER_HOUR"; basePrice?: number; currency?: "NPR" | "USD" | "INR" };
-    capacity?: { minGuests?: number; maxGuests?: number };
-    amenities?: string[];
-    isActive?: boolean;
-};
+import AddPackageForm from "./AddPackageForm";
+import { handleUpdateVenue } from "@/lib/actions/venues/venues-actions";
+import { handleDeletePackage } from "@/lib/actions/packages/packages-action";
+
+import {
+    venueSchema,
+    type VenueType,
+    updateVenueSchema,
+    type UpdateVenueType,
+} from "../../../../schema/venue-schema";
 
 type Package = {
     _id: string;
     venueId: string;
     name: string;
     description?: string;
-    pricing?: { priceType?: "PER_PLATE" | "FLAT"; price?: number; currency?: "NPR" | "USD" | "INR" };
+    pricePerPlate?: number;
     inclusions?: string[];
     images?: string[];
     isActive?: boolean;
     createdAt?: string;
 };
 
-function joinAmenities(arr?: string[]) {
-    return (arr || []).join(", ");
+function normalizeAmenities(val: unknown): string[] {
+    if (Array.isArray(val)) {
+        return val.map((s) => String(s).trim()).filter(Boolean);
+    }
+    if (typeof val === "string") {
+        return val
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
+    }
+    return [];
 }
 
 export default function EditVenueForm({
     venue,
     initialPackages,
 }: {
-    venue: Venue;
+    venue: unknown;
     initialPackages: Package[];
 }) {
     const router = useRouter();
     const [pending, startTransition] = useTransition();
 
-    const [form, setForm] = useState({
-        name: venue.name || "",
-        description: venue.description || "",
-        area: venue.address?.area || "",
-        city: venue.address?.city || "Kathmandu",
-        country: venue.address?.country || "Nepal",
-        zipCode: venue.address?.zipCode || "",
-        baseType: venue.pricing?.baseType || "PER_PLATE",
-        basePrice: String(venue.pricing?.basePrice ?? ""),
-        currency: venue.pricing?.currency || "NPR",
-        minGuests: String(venue.capacity?.minGuests ?? 1),
-        maxGuests: String(venue.capacity?.maxGuests ?? ""),
-        amenities: joinAmenities(venue.amenities),
-        isActive: venue.isActive ?? true,
+    const parsedVenue: VenueType = useMemo(() => {
+        const res = venueSchema.safeParse(venue);
+        if (res.success) return res.data;
+
+        return {
+            _id: (venue as any)?._id || "",
+            name: (venue as any)?.name || "",
+            description: (venue as any)?.description,
+            address: (venue as any)?.address,
+            capacity: (venue as any)?.capacity,
+            amenities: (venue as any)?.amenities,
+            isActive: (venue as any)?.isActive,
+            images: (venue as any)?.images,
+            pricePerPlate: (venue as any)?.pricePerPlate,
+        };
+    }, [venue]);
+
+    const venueId = parsedVenue._id;
+
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors, isSubmitting },
+    } = useForm<UpdateVenueType>({
+        resolver: zodResolver(updateVenueSchema) as any,
+        defaultValues: {
+            name: parsedVenue.name || "",
+            description: parsedVenue.description || "",
+            address: {
+                area: parsedVenue.address?.area ?? "",
+                city: parsedVenue.address?.city ?? "Kathmandu",
+                country: parsedVenue.address?.country ?? "Nepal",
+                zipCode: parsedVenue.address?.zipCode ?? "",
+            },
+            pricePerPlate: parsedVenue.pricePerPlate ?? 0,
+            capacity: {
+                minGuests: parsedVenue.capacity?.minGuests ?? 1,
+                maxGuests: parsedVenue.capacity?.maxGuests ?? 1,
+            },
+
+            amenities: parsedVenue.amenities ?? [],
+
+            isActive: parsedVenue.isActive ?? true,
+        },
+        mode: "onSubmit",
     });
 
     const [packages, setPackages] = useState<Package[]>(initialPackages || []);
     const [showAddPkg, setShowAddPkg] = useState(false);
 
-    const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value, type, checked } = e.target as HTMLInputElement;
-        setForm((p) => ({ ...p, [name]: type === "checkbox" ? checked : value }));
-    };
-
-    const onSubmitVenue = async (e: React.FormEvent) => {
-        e.preventDefault();
-
+    const onSubmitVenue = async (data: UpdateVenueType) => {
         const payload = {
-            name: form.name,
-            description: form.description,
+            name: data.name,
+            description: data.description,
             address: {
-                area: form.area || undefined,
-                city: form.city,
-                country: form.country,
-                zipCode: form.zipCode || undefined,
+                area: data.address.area || undefined,
+                city: data.address.city,
+                country: data.address.country,
+                zipCode: data.address.zipCode || undefined,
             },
-            pricing: {
-                baseType: form.baseType,
-                basePrice: Number(form.basePrice || 0),
-                currency: form.currency,
-            },
+            pricePerPlate: data.pricePerPlate,
             capacity: {
-                minGuests: Number(form.minGuests || 1),
-                maxGuests: Number(form.maxGuests || 0),
+                minGuests: data.capacity.minGuests,
+                maxGuests: data.capacity.maxGuests,
             },
-            amenities: form.amenities,
-            isActive: form.isActive,
+
+            amenities: normalizeAmenities((data as any).amenities),
+
+            isActive: data.isActive,
         };
 
+        const parsed = updateVenueSchema.safeParse(payload);
+        if (!parsed.success) {
+            toast.error(parsed.error.issues?.[0]?.message || "Invalid form data");
+            return;
+        }
+
         try {
-            const res = await handleUpdateVenue(venue._id, payload);
+            const res = await handleUpdateVenue(venueId, parsed.data);
             if (!res.success) throw new Error(res.message || "Failed to update venue");
             toast.success("Venue updated");
             startTransition(() => router.refresh());
         } catch (err: any) {
-            toast.error(err.message || "Failed to update venue");
+            toast.error(err?.message || "Failed to update venue");
         }
     };
 
@@ -118,9 +151,11 @@ export default function EditVenueForm({
             setPackages((p) => p.filter((x) => x._id !== pkgId));
             startTransition(() => router.refresh());
         } catch (err: any) {
-            toast.error(err.message || "Failed to delete package");
+            toast.error(err?.message || "Failed to delete package");
         }
     };
+
+    const isActive = watch("isActive");
 
     return (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.15fr_0.85fr]">
@@ -131,174 +166,145 @@ export default function EditVenueForm({
                     <p className="text-sm text-slate-600">Update venue details.</p>
                 </div>
 
-                <form onSubmit={onSubmitVenue} className="p-6 space-y-5">
+                <form onSubmit={handleSubmit(onSubmitVenue)} className="p-6 space-y-5">
                     <div>
                         <label className="block text-sm font-semibold text-slate-700">Venue Name</label>
                         <input
-                            name="name"
-                            value={form.name}
-                            onChange={onChange}
-                            required
-                            className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-yellow-100"
+                            {...register("name")}
+                            className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm text-black outline-none focus:ring-2 focus:ring-yellow-100"
                         />
+                        {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
                     </div>
 
                     <div>
                         <label className="block text-sm font-semibold text-slate-700">Description</label>
                         <textarea
-                            name="description"
-                            value={form.description}
-                            onChange={onChange}
+                            {...register("description")}
                             rows={4}
-                            className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-yellow-100"
+                            className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm text-black outline-none focus:ring-2 focus:ring-yellow-100"
                         />
+                        {errors.description && (
+                            <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+                        )}
                     </div>
 
+                    {/* Address */}
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                             <label className="block text-sm font-semibold text-slate-700">Area</label>
                             <input
-                                name="area"
-                                value={form.area}
-                                onChange={onChange}
-                                className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm"
+                                {...register("address.area")}
+                                className="mt-1 w-full rounded-lg text-black border border-black/10 px-4 py-2.5 text-sm"
                             />
                         </div>
 
                         <div>
                             <label className="block text-sm font-semibold text-slate-700">City</label>
                             <input
-                                name="city"
-                                value={form.city}
-                                onChange={onChange}
-                                className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm"
+                                {...register("address.city")}
+                                className="mt-1 w-full rounded-lg text-black border border-black/10 px-4 py-2.5 text-sm"
                             />
+                            {errors.address?.city && (
+                                <p className="mt-1 text-sm text-red-600">{errors.address.city.message}</p>
+                            )}
                         </div>
 
                         <div>
                             <label className="block text-sm font-semibold text-slate-700">Country</label>
                             <input
-                                name="country"
-                                value={form.country}
-                                onChange={onChange}
-                                className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm"
+                                {...register("address.country")}
+                                className="mt-1 w-full rounded-lg text-black border border-black/10 px-4 py-2.5 text-sm"
                             />
+                            {errors.address?.country && (
+                                <p className="mt-1 text-sm text-red-600">{errors.address.country.message}</p>
+                            )}
                         </div>
 
                         <div>
                             <label className="block text-sm font-semibold text-slate-700">Zip Code</label>
                             <input
-                                name="zipCode"
-                                value={form.zipCode}
-                                onChange={onChange}
-                                className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm"
+                                {...register("address.zipCode")}
+                                className="mt-1 w-full rounded-lg text-black border border-black/10 px-4 py-2.5 text-sm"
                             />
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700">Pricing Type</label>
-                            <select
-                                name="baseType"
-                                value={form.baseType}
-                                onChange={onChange}
-                                className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm"
-                            >
-                                <option value="PER_PLATE">Per Plate</option>
-                                <option value="FLAT">Flat</option>
-                                <option value="PER_HOUR">Per Hour</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700">Base Price</label>
-                            <input
-                                type="number"
-                                name="basePrice"
-                                value={form.basePrice}
-                                onChange={onChange}
-                                className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700">Currency</label>
-                            <select
-                                name="currency"
-                                value={form.currency}
-                                onChange={onChange}
-                                className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm"
-                            >
-                                <option value="NPR">NPR</option>
-                                <option value="USD">USD</option>
-                                <option value="INR">INR</option>
-                            </select>
-                        </div>
-                    </div>
-
+                    {/* Capacity */}
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                             <label className="block text-sm font-semibold text-slate-700">Min Guests</label>
                             <input
                                 type="number"
-                                name="minGuests"
-                                value={form.minGuests}
-                                onChange={onChange}
-                                className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm"
+                                {...register("capacity.minGuests", { valueAsNumber: true })}
+                                className="mt-1 w-full rounded-lg text-black border border-black/10 px-4 py-2.5 text-sm"
                             />
+                            {errors.capacity?.minGuests && (
+                                <p className="mt-1 text-sm text-red-600">{errors.capacity.minGuests.message}</p>
+                            )}
                         </div>
 
                         <div>
                             <label className="block text-sm font-semibold text-slate-700">Max Guests</label>
                             <input
                                 type="number"
-                                name="maxGuests"
-                                value={form.maxGuests}
-                                onChange={onChange}
-                                className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm"
+                                {...register("capacity.maxGuests", { valueAsNumber: true })}
+                                className="mt-1 w-full rounded-lg text-black border border-black/10 px-4 py-2.5 text-sm"
                             />
+                            {errors.capacity?.maxGuests && (
+                                <p className="mt-1 text-sm text-red-600">{errors.capacity.maxGuests.message}</p>
+                            )}
                         </div>
                     </div>
 
+                    {/* Price Per Plate */}
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700">Price Per Plate</label>
+                        <input
+                            type="number"
+                            {...register("pricePerPlate", { valueAsNumber: true })}
+                            className="mt-1 w-full rounded-lg text-black border border-black/10 px-4 py-2.5 text-sm"
+                        />
+                        {errors.pricePerPlate && (
+                            <p className="mt-1 text-sm text-red-600">{errors.pricePerPlate.message}</p>
+                        )}
+                    </div>
+
+                    {/* Amenities */}
                     <div>
                         <label className="block text-sm font-semibold text-slate-700">Amenities</label>
                         <input
-                            name="amenities"
-                            value={form.amenities}
-                            onChange={onChange}
+                            {...register("amenities" as any)}
                             placeholder="Parking, AC, WiFi"
-                            className="mt-1 w-full rounded-lg border border-black/10 px-4 py-2.5 text-sm"
+                            className="mt-1 w-full rounded-lg text-black border border-black/10 px-4 py-2.5 text-sm"
                         />
-                        <p className="mt-1 text-xs text-slate-500">Comma separated (same as your backend transform).</p>
+
+                        {errors.amenities && (
+                            <p className="mt-1 text-sm text-red-600">{errors.amenities.message as any}</p>
+                        )}
                     </div>
 
+                    {/* Active */}
                     <div className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            name="isActive"
-                            checked={form.isActive}
-                            onChange={onChange}
-                            className="h-4 w-4 accent-yellow-600"
-                        />
-                        <span className="text-sm text-slate-700">Venue is active</span>
+                        <input type="checkbox" {...register("isActive")} className="h-4 w-4 accent-yellow-600" />
+                        <span className="text-sm text-slate-700">Venue is {isActive ? "active" : "inactive"}</span>
                     </div>
 
+                    {/* Actions */}
                     <div className="flex items-center justify-end gap-3 pt-2">
                         <button
                             type="button"
                             onClick={() => router.back()}
-                            className="rounded-lg border border-black/10 bg-white px-4 py-2 text-sm font-semibold"
+                            className="rounded-lg border border-black/10 bg-white px-4 py-2 text-sm text-gray-500 font-semibold hover:underline"
                         >
                             Cancel
                         </button>
 
                         <button
                             type="submit"
-                            disabled={pending}
+                            disabled={isSubmitting || pending}
                             className="rounded-lg bg-yellow-600 px-5 py-2 text-sm font-semibold text-white hover:bg-yellow-700 disabled:opacity-60"
                         >
-                            {pending ? "Saving..." : "Save Changes"}
+                            {isSubmitting || pending ? "Saving..." : "Save Changes"}
                         </button>
                     </div>
                 </form>
@@ -323,7 +329,7 @@ export default function EditVenueForm({
                 {showAddPkg && (
                     <div className="p-6 border-b border-black/10">
                         <AddPackageForm
-                            venueId={venue._id}
+                            venueId={venueId}
                             onCreated={(pkg) => {
                                 setPackages((p) => [pkg, ...p]);
                                 setShowAddPkg(false);
@@ -339,20 +345,15 @@ export default function EditVenueForm({
                         </div>
                     ) : (
                         packages.map((p) => (
-                            <div
-                                key={p._id}
-                                className="rounded-xl border border-black/10 bg-white p-4"
-                            >
+                            <div key={p._id} className="rounded-xl border border-black/10 bg-white p-4">
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0">
                                         <p className="truncate text-sm font-bold text-[#233041]">{p.name}</p>
-                                        <p className="mt-1 text-xs text-slate-600 line-clamp-2">
-                                            {p.description || "No description"}
-                                        </p>
+                                        <p className="mt-1 text-xs text-slate-600 line-clamp-2">{p.description || "No description"}</p>
 
                                         <div className="mt-2 flex flex-wrap gap-2">
                                             <span className="rounded-full bg-[#FBF8F5] px-2.5 py-1 text-xs font-semibold text-[#B7795B] border border-[#E9E2DC]">
-                                                {p.pricing?.priceType || "FLAT"} • {p.pricing?.currency || "NPR"} {p.pricing?.price ?? 0}
+                                                Per plate: NPR {p.pricePerPlate ?? 0}
                                             </span>
 
                                             {p.isActive === false ? (
