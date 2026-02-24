@@ -1,3 +1,4 @@
+import Link from "next/link";
 import EditVenueForm from "./_components/EditVenueForm";
 import { handleGetVenueById } from "@/lib/actions/venues/venues-actions";
 import { handleGetPackagesByVenue } from "@/lib/actions/packages/packages-action";
@@ -34,6 +35,25 @@ export default async function Page({
 
     return (
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 bg-white">
+            {/* Back button */}
+            <div className="mb-6 flex items-center justify-end">
+                <Link
+                    href="/admin/venues"
+                    className="
+            inline-flex items-center gap-2
+            rounded-lg border border-black/10
+            bg-white px-4 py-2
+            text-sm font-semibold text-[#233041]
+            shadow-sm
+            hover:bg-gray-50 hover:shadow
+            transition
+        "
+                >
+                    <span className="text-base leading-none">←</span>
+                    Back to Venues
+                </Link>
+            </div>
+
             <EditVenueForm
                 venue={venueRes.data}
                 initialPackages={pkgRes.success ? pkgRes.data || [] : []}
