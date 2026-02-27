@@ -281,10 +281,10 @@ export default function VenueDetailsCard({
 
                             <div className="mt-4 grid grid-cols-1 gap-2">
                                 <Link
-                                    href={reserveHref || `/user/venues/${venue._id}/reserve`}
+                                    href={reserveHref || `/user/venues/${venue._id}/booking`}
                                     className="inline-flex w-full items-center justify-center rounded-xl bg-[#233041] px-5 py-2.5 text-sm font-semibold text-white hover:opacity-95 transition"
                                 >
-                                    Reserve Now
+                                    Book Now
                                 </Link>
 
                                 <Link

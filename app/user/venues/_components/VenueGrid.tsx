@@ -103,10 +103,10 @@ function VenueCard({ venue }: { venue: VenueType }) {
                     {/* Actions */}
                     <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                         <Link
-                            href={`/user/venues/${venue._id}/reserve`}
+                            href={`/user/venues/${venue._id}/booking`}
                             className="inline-flex w-full items-center justify-center rounded-xl bg-[#233041] px-5 py-2.5 text-sm font-semibold text-white hover:opacity-95 transition"
                         >
-                            Reserve Now
+                            Book Now
                         </Link>
 
                         <Link
