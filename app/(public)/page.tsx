@@ -2,52 +2,54 @@ import Link from "next/link";
 import Image from "next/image";
 import HowItWorks from "./_components/HowItWorks";
 
-export default function Home() {
-  const packages = [
-    {
-      title: "Birthday Celebration",
-      desc: "Make birthdays special with perfect party venue.",
-      img: "/images/packages/HappyB.png",
-    },
-    {
-      title: "Wedding/Engagement",
-      desc: "A complete venue package for elegant wedding or engagement ceremonies.",
-      img: "/images/packages/wedding.png",
-    },
-    {
-      title: "Out Door Party",
-      desc: "Celebrate in the open air with a perfect garden or terrace setup.",
-      img: "/images/packages/outdoorparty.png",
-    },
-    {
-      title: "Kids Party",
-      desc: "A fun-filled venue designed specially for children's celebration..",
-      img: "/images/packages/kidsparty.png",
-    },
-  ];
+import { handleGetAllPackages } from "@/lib/actions/packages/packages-action";
+import { handleGetAllVenues } from "@/lib/actions/venues/venues-actions";
 
-  const venues = [
-    {
-      title: "Lord Palace Banquet",
-      address: "P8VC+7WJ, Tokha Rd,\nKathmandu 44600",
-      img: "/images/venues/lordpalace.png",
-    },
-    {
-      title: "Dhumrabargha Venue",
-      address: "Handigaun Marg,\nKathmandu 44600",
-      img: "/images/venues/dhumrabaraha.png",
-    },
-    {
-      title: "Crystal Banquet",
-      address: "M8C8+584, Lalitpur\n44600",
-      img: "/images/venues/crystal.png",
-    },
-    {
-      title: "Silver Oak Party Palace",
-      address: "Between PM Road and\nTukucha Marg,\nKathmandu 44600",
-      img: "/images/venues/silveroak.png",
-    },
-  ];
+function getImageUrl(files?: any): string {
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+
+  const pickFirst = (val: any): string | undefined => {
+    if (!val) return undefined;
+    if (typeof val === "string") return val;
+    if (Array.isArray(val)) return val[0];
+    if (typeof val === "object") {
+      if (Array.isArray(val.images)) return val.images[0];
+      if (Array.isArray(val.files)) return val.files[0];
+    }
+    return undefined;
+  };
+
+  const file = pickFirst(files);
+  if (!file) return "/images/placeholder-venue.jpg";
+  if (typeof file === "string" && file.startsWith("http")) return file;
+
+  const cleaned = String(file).replace(/^\/+/, "");
+  if (!apiBase) return `/${cleaned}`; // last resort
+  if (cleaned.startsWith("uploads/")) return `${apiBase}/${cleaned}`;
+  return `${apiBase}/uploads/${cleaned}`;
+}
+
+function formatAddress(v: any) {
+  const a = v?.address;
+  if (!a) return v?.location || v?.address || "";
+
+  const lines = [
+    a.area,
+    a.city,
+    a.country,
+    a.zipCode ? `ZIP: ${a.zipCode}` : "",
+  ].filter(Boolean);
+
+  return lines.join("\n");
+}
+
+export default async function Home() {
+  const packagesRes = await handleGetAllPackages({ page: 1, size: 4, search: "" });
+  const packages = packagesRes.success ? packagesRes.packages ?? [] : [];
+
+  const venuesRes = await handleGetAllVenues();
+  const venuesAll = venuesRes.success ? venuesRes.data ?? [] : [];
+  const venues = venuesAll.slice(0, 4);
 
   return (
     <main className="min-h-screen bg-white text-[#233041]">
@@ -107,29 +109,40 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {packages.map((p) => (
-            <Link
-              key={p.title}
-              href="/packages"
-              className="group rounded-2xl border border-[#233041]/10 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <div className="relative aspect-4/3 w-full overflow-hidden rounded-xl bg-[#F2EFEA]">
-                <Image
-                  src={p.img}
-                  alt={p.title}
-                  fill
-                  className="object-contain p-4"
-                />
-              </div>
+        {packages.length === 0 ? (
+          <div className="mt-5 rounded-2xl border border-[#233041]/10 bg-white p-6 text-sm text-[#233041]/60">
+            No packages found.
+          </div>
+        ) : (
+          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {packages.map((p: any) => (
+              <Link
+                key={p?._id ?? p?.name}
+                href={`/packages/${p?._id ?? ""}`}
+                className="group rounded-2xl border border-[#233041]/10 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <div className="relative aspect-4/3 w-full overflow-hidden rounded-xl bg-[#F2EFEA]">
+                  <Image
+                    src={getImageUrl(p?.images)}
+                    alt={p?.name ?? "Package"}
+                    fill
+                    className="object-contain p-4"
+                  />
+                </div>
 
-              <h3 className="mt-4 text-sm font-semibold">{p.title}</h3>
-              <p className="mt-1 text-xs leading-relaxed text-[#233041]/55">
-                {p.desc}
-              </p>
-            </Link>
-          ))}
-        </div>
+                <h3 className="mt-4 text-sm font-semibold">{p?.name ?? "Untitled Package"}</h3>
+
+                <p className="mt-1 text-xs leading-relaxed text-[#233041]/55">
+                  {p?.description
+                    ? String(p.description)
+                    : p?.pricePerPlate
+                      ? `Starting at Rs. ${p.pricePerPlate} per plate`
+                      : "View package details"}
+                </p>
+              </Link>
+            ))}
+          </div>
+        )}
 
         {/* Venues */}
         <div className="mt-12 flex items-end justify-between">
@@ -142,31 +155,37 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {venues.map((v) => (
-            <Link
-              key={v.title}
-              href="/venues"
-              className="group rounded-2xl border border-[#233041]/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <div className="relative h-40 w-full overflow-hidden rounded-t-2xl bg-[#EDE7E1]">
-                <Image
-                  src={v.img}
-                  alt={v.title}
-                  fill
-                  className="object-cover"
-                />
-              </div>
+        {venues.length === 0 ? (
+          <div className="mt-5 rounded-2xl border border-[#233041]/10 bg-white p-6 text-sm text-[#233041]/60">
+            No venues found.
+          </div>
+        ) : (
+          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {venues.map((v: any) => (
+              <Link
+                key={v?._id ?? v?.name}
+                href={`/venues/${v?._id ?? ""}`}
+                className="group rounded-2xl border border-[#233041]/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <div className="relative h-40 w-full overflow-hidden rounded-t-2xl bg-[#EDE7E1]">
+                  <Image
+                    src={getImageUrl(v?.images)}
+                    alt={v?.name ?? "Venue"}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
 
-              <div className="p-4">
-                <h3 className="text-sm font-semibold">{v.title}</h3>
-                <p className="mt-1 whitespace-pre-line text-xs leading-relaxed text-[#233041]/55">
-                  {v.address}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
+                <div className="p-4">
+                  <h3 className="text-sm font-semibold">{v?.name ?? "Untitled Venue"}</h3>
+                  <p className="mt-1 whitespace-pre-line text-xs leading-relaxed text-[#233041]/55">
+                    {formatAddress(v) || "View venue details"}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
 
         {/* How it works */}
         <HowItWorks />
