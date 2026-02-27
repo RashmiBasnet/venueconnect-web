@@ -1,6 +1,6 @@
 "use server";
 
-import { getAllUsers, getUserById } from "@/lib/api/admin/users";
+import { deleteUser, getAllUsers, getUserById } from "@/lib/api/admin/users";
 
 export async function handleGetAllUsers(params: {
     page?: number;
@@ -16,7 +16,7 @@ export async function handleGetAllUsers(params: {
             size: pageSize,
             search: searchQuery,
         });
-        if(response.success) {
+        if (response.success) {
             return {
                 success: true,
                 users: response.data,
@@ -34,7 +34,7 @@ export async function handleGetAllUsers(params: {
 export async function handleGetUserById(id: string) {
     try {
         const response = await getUserById(id);
-        if(response.success) {
+        if (response.success) {
             return {
                 success: true,
                 data: response.data,
@@ -45,6 +45,28 @@ export async function handleGetUserById(id: string) {
     } catch (err: Error | any) {
         throw new Error(
             err.message || "Failed to fetch user"
+        );
+    }
+}
+
+export async function handleDeleteUser(id: string) {
+    try {
+        const response = await deleteUser(id);
+        if (response.success) {
+            return {
+                success: true,
+                data: response.data,
+                message: "Deleted user successfully"
+            }
+        }
+        return {
+            success: false,
+            data: response.data,
+            message: "Failed to delete user"
+        }
+    } catch (err: Error | any) {
+        throw new Error(
+            err.message || "Failed to delete user"
         );
     }
 }

@@ -23,6 +23,13 @@ export const API = {
             DELETE: (id: string) => `/api/admin/packages/${id}`,
             REPLACE_IMAGES: (id: string) => `/api/admin/packages/${id}/images`,
         },
+        BOOKINGS: {
+            GET_ALL: "/api/admin/booking",
+            GET_BY_ID: (id: string) => `/api/admin/booking/${id}`,
+            UPDATE_STATUS: (id: string) => `/api/admin/booking/${id}/status`,
+            UPDATE_PAYMENT_STATUS: (id: string) =>
+                `/api/admin/booking/${id}/payment-status`,
+        },
     },
     USER: {
         GET_PROFILE: "/api/user/profile",
@@ -38,5 +45,10 @@ export const API = {
         GET_ALL: "/api/packages",
         GET_BY_VENUE: (venueId: string) => `/api/packages/venue/${venueId}`,
         GET_BY_ID: (id: string) => `/api/packages/${id}`,
+    },
+    BOOKINGS: {
+        CREATE: "/api/booking",
+        GET_MY: "/api/booking/me",
+        GET_MY_BY_ID: (id: string) => `/api/booking/${id}`,
     },
 }
