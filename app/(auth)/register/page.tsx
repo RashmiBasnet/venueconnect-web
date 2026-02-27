@@ -10,16 +10,16 @@ export default function Page() {
 
         <div className="p-10">
           <Link href="/login" className="text-sm text-gray-500 hover:underline">
-            <ArrowLeft className="text-[#A78E59]"/>
+            <ArrowLeft className="text-[#A78E59]" />
           </Link>
 
           <div className="text-center">
             <h1 className="text-3xl font-semibold mt-2 text-black">Create Account</h1>
             <p className="text-gray-500 mt-1 text-xs font-extralight">
-                Already have an account?{" "}
-                <Link href="/login" className=" font-semibold text-[#A78E59]">
+              Already have an account?{" "}
+              <Link href="/login" className=" font-semibold text-[#A78E59]">
                 Login
-                </Link>
+              </Link>
             </p>
           </div>
 

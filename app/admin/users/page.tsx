@@ -11,7 +11,6 @@ export default async function Page({
     const size = query.size ? parseInt(query.size as string, 10) : 10;
     const search = query.search ? (query.search as string) : "";
     console.log("Search params:", { page, size, search });
-    // call api
     const result = await handleGetAllUsers({ page, size, search });
     return (
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 bg-white">

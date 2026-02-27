@@ -3,25 +3,32 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import DeleteUserButton from "./DeleteUserButton";
 
-export default function UsersTable(
-    { users, pagination, search } :
-    { users: any[]; pagination: any; search: string }
-) {
-    const router = useRouter();
-    const [searchTerm, setSearchTerm] = useState(search);
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        router.push(`/admin/users?search=${searchTerm}`);
-        router.refresh();
-    }
+export default function UsersTable({
+  users,
+  pagination,
+  search,
+}: {
+  users: any[];
+  pagination: any;
+  search: string;
+}) {
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState(search);
 
-    return (
-        <div className="space-y-5">
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    router.push(`/admin/users?search=${encodeURIComponent(searchTerm)}`);
+    router.refresh();
+  };
+
+  return (
+    <div className="space-y-5">
       {/* Header row */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-black">Users</h1>
+          <h1 className="text-4xl font-semibold text-black">Users</h1>
           <p className="text-sm text-gray-500">
             Search users and manage their information.
           </p>
@@ -65,9 +72,8 @@ export default function UsersTable(
                 users.map((user, idx) => (
                   <tr
                     key={user._id}
-                    className={`${
-                      idx % 2 === 0 ? "bg-white" : "bg-gray-50/40"
-                    } hover:bg-yellow-50/40 transition`}
+                    className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50/40"
+                      } hover:bg-yellow-50/40 transition`}
                   >
                     <td className="px-4 py-3">
                       <span className="font-mono text-xs text-gray-600">
@@ -76,7 +82,9 @@ export default function UsersTable(
                     </td>
 
                     <td className="px-4 py-3">
-                      <div className="font-medium text-black">{user.fullName}</div>
+                      <div className="font-medium text-black">
+                        {user.fullName}
+                      </div>
                     </td>
 
                     <td className="px-4 py-3 text-gray-700">{user.email}</td>
@@ -85,26 +93,28 @@ export default function UsersTable(
                       <div className="flex justify-end gap-2">
                         <Link
                           href={`/admin/users/${user._id}`}
-                          className="rounded-md border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold text-black
-                                     hover:bg-gray-50 transition"
+                          className="
+                              inline-flex items-center justify-center gap-1.5
+                              h-10 px-3
+                              rounded-lg
+                              border border-black/10
+                              bg-white
+                              text-xs font-semibold text-black
+                              hover:bg-gray-50
+                              transition
+                            "
                         >
                           View
                         </Link>
 
-                        <Link
-                          href={`/admin/users/${user._id}/edit`}
-                          className="rounded-md bg-yellow-600 px-3 py-1.5 text-xs font-semibold text-white
-                                     hover:bg-yellow-900 transition"
-                        >
-                          Edit
-                        </Link>
+                        <DeleteUserButton userId={String(user._id)} />
                       </div>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-gray-500">
+                  <td colSpan={4} className="px-4 py-10 text-center text-gray-500">
                     No users found.
                   </td>
                 </tr>
@@ -125,9 +135,10 @@ export default function UsersTable(
               {pagination.page > 1 ? (
                 <Link
                   className="rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-black hover:bg-gray-50 transition"
-                  href={`/admin/users?page=${pagination.page - 1}&size=${pagination.size}&search=${encodeURIComponent(
-                    search || ""
-                  )}`}
+                  href={`/admin/users?page=${pagination.page - 1
+                    }&size=${pagination.size}&search=${encodeURIComponent(
+                      search || ""
+                    )}`}
                 >
                   Previous
                 </Link>
@@ -143,9 +154,10 @@ export default function UsersTable(
               {pagination.page < pagination.totalPages ? (
                 <Link
                   className="rounded-lg bg-yellow-600 px-3 py-2 text-sm font-semibold text-white hover:bg-yellow-900 transition"
-                  href={`/admin/users?page=${pagination.page + 1}&size=${pagination.size}&search=${encodeURIComponent(
-                    search || ""
-                  )}`}
+                  href={`/admin/users?page=${pagination.page + 1
+                    }&size=${pagination.size}&search=${encodeURIComponent(
+                      search || ""
+                    )}`}
                 >
                   Next
                 </Link>
@@ -162,5 +174,5 @@ export default function UsersTable(
         )}
       </div>
     </div>
-    )
+  );
 }
