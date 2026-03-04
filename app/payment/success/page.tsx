@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { handleVerifyKhaltiPayment } from "@/lib/actions/payment/payment-action";
 import { toast } from "sonner";
@@ -8,15 +8,30 @@ import { toast } from "sonner";
 export default function PaymentSuccessPage() {
     const sp = useSearchParams();
     const router = useRouter();
-    const [loading, setLoading] = useState(true);
+    const didRunRef = useRef(false);
 
     useEffect(() => {
+        if (didRunRef.current) return;
+        didRunRef.current = true;
+
         const pidx = sp.get("pidx");
-        const bookingId = sp.get("bookingId");
+        const rawBookingId =
+            sp.get("purchase_order_id") ||
+            sp.get("purchaseOrderId") ||
+            sp.get("bookingId");
+        const bookingId = rawBookingId
+            ? rawBookingId.split("?")[0].replace(/\/+$/, "")
+            : null;
+        const khaltiStatus = (sp.get("status") || "").toLowerCase();
 
         if (!pidx || !bookingId) {
             toast.error("Missing payment info");
-            setLoading(false);
+            return;
+        }
+
+        if (khaltiStatus && khaltiStatus !== "completed") {
+            toast.error("Payment was not completed");
+            router.replace(`/user/booking/${bookingId}`);
             return;
         }
 
@@ -25,12 +40,12 @@ export default function PaymentSuccessPage() {
 
             if (!res.success) {
                 toast.error(res.message || "Payment verification failed");
-                setLoading(false);
+                router.replace(`/user/booking/${bookingId}`);
                 return;
             }
 
             toast.success("Payment verified!");
-            router.replace(`/user/bookings/${bookingId}`);
+            router.replace(`/user/booking/${bookingId}`);
         })();
     }, [sp, router]);
 
@@ -38,7 +53,7 @@ export default function PaymentSuccessPage() {
         <div className="min-h-screen flex items-center justify-center">
             <div className="rounded-2xl border bg-white p-6 shadow-sm">
                 <h1 className="text-xl font-semibold text-black">
-                    {loading ? "Verifying payment..." : "Done"}
+                    Verifying payment...
                 </h1>
                 <p className="mt-2 text-sm text-black/60">
                     Please don’t close this tab.

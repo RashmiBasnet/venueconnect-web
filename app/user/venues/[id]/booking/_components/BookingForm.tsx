@@ -184,11 +184,23 @@ export default function BookingForm({
                 return;
             }
 
-            const returnUrl = `${window.location.origin}/payment/success?bookingId=${bookingId}`;
+            const createdTotal =
+                Number((createRes as any)?.data?.totalPrice) ||
+                Number((createRes as any)?.data?.booking?.totalPrice) ||
+                Number(totalPricePreview);
+            const paymentAmount = Math.max(0, Math.round(createdTotal));
+
+            if (paymentAmount <= 0) {
+                toast.error("Invalid payment amount");
+                router.push(`/user/booking/${bookingId}`);
+                return;
+            }
+
+            const returnUrl = `${window.location.origin}/payment/success`;
 
             const payRes = await handleInitiateKhaltiPayment({
                 bookingId: String(bookingId),
-                amount: Number(totalPricePreview), // rupees (backend converts to paisa)
+                amount: paymentAmount, // rupees (backend converts to paisa)
                 returnUrl,
             } as any);
 

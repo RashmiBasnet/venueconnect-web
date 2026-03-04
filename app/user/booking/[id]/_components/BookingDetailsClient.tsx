@@ -48,7 +48,7 @@ export default function BookingDetailsClient({ booking }: { booking: BookingUI }
                 const origin =
                     typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
 
-                const returnUrl = `${origin}/payment/success?bookingId=${booking._id}`;
+                const returnUrl = `${origin}/payment/success`;
 
                 const res = await handleInitiateKhaltiPayment({
                     bookingId: booking._id,

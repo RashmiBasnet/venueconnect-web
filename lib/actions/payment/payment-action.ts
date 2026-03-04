@@ -11,6 +11,7 @@ import {
     type KhaltiVerifyData,
     type PaymentStatus,
 } from "@/lib/api/payment";
+import { revalidatePath } from "next/cache";
 
 export interface PaymentActionResult {
     success: boolean;
@@ -61,8 +62,20 @@ export const handleVerifyKhaltiPayment = async (
 ): Promise<PaymentActionResult> => {
     try {
         const result = await verifyKhaltiPayment(data);
+        const nestedSuccess = (result as any)?.data?.success;
+        const isVerified = result.success && (nestedSuccess === undefined || nestedSuccess === true);
 
-        if (result.success) {
+        if (isVerified) {
+            const verifiedBookingId =
+                (result as any)?.data?.payment?.bookingId ||
+                data.bookingId;
+
+            if (verifiedBookingId) {
+                revalidatePath("/user/activity");
+                revalidatePath(`/user/booking/${verifiedBookingId}`);
+                revalidatePath("/admin/bookings");
+            }
+
             return {
                 success: true,
                 message: result.message || "Payment verified successfully",
@@ -72,7 +85,10 @@ export const handleVerifyKhaltiPayment = async (
 
         return {
             success: false,
-            message: result.message || "Failed to verify payment",
+            message:
+                (result as any)?.data?.message ||
+                result.message ||
+                "Failed to verify payment",
         };
     } catch (err: any) {
         console.error("Error in handleVerifyKhaltiPayment:", err?.response?.data || err);
