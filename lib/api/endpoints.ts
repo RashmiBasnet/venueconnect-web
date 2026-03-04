@@ -30,6 +30,9 @@ export const API = {
             UPDATE_PAYMENT_STATUS: (id: string) =>
                 `/api/admin/booking/${id}/payment-status`,
         },
+        PAYMENTS: {
+            GET_ALL: "/api/payments/admin/all",
+        },
     },
     USER: {
         GET_PROFILE: "/api/user/profile",
@@ -51,4 +54,15 @@ export const API = {
         GET_MY: "/api/booking/me",
         GET_MY_BY_ID: (id: string) => `/api/booking/${id}`,
     },
-}
+    PAYMENTS: {
+        KHALTI: {
+            INITIATE: "/api/payments/khalti/initiate",
+            VERIFY: "/api/payments/khalti/verify",
+            WEBHOOK: "/api/payments/khalti/webhook",
+        },
+        USER: {
+            GET_MY: "/api/payments/user",
+            GET_BY_BOOKING_ID: (bookingId: string) => `/api/payments/booking/${bookingId}`,
+        },
+    },
+};
