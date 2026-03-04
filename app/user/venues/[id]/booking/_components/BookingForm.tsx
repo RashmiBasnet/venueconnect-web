@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 
 import { handleCreateBooking } from "@/lib/actions/booking/booking-actions";
+import { handleInitiateKhaltiPayment } from "@/lib/actions/payment/payment-action";
 
 type VenueUI = {
     _id: string;
@@ -62,7 +63,10 @@ export default function BookingForm({
     packages: PackageUI[];
 }) {
     const router = useRouter();
-    const [pending, startTransition] = useTransition();
+
+    const [pendingCreate, startCreate] = useTransition();
+    const [pendingPay, startPay] = useTransition();
+
     const [selectedPackageId, setSelectedPackageId] = useState<string>("");
 
     const activePackages = useMemo(
@@ -76,20 +80,11 @@ export default function BookingForm({
     }, [activePackages, selectedPackageId]);
 
     const minGuests = useMemo(() => {
-        // if package has minGuests, use it; else venue minGuests; else 1
-        return (
-            selectedPackage?.capacity?.minGuests ??
-            venue.capacity?.minGuests ??
-            1
-        );
+        return selectedPackage?.capacity?.minGuests ?? venue.capacity?.minGuests ?? 1;
     }, [selectedPackage, venue]);
 
     const maxGuests = useMemo(() => {
-        return (
-            selectedPackage?.capacity?.maxGuests ??
-            venue.capacity?.maxGuests ??
-            999999
-        );
+        return selectedPackage?.capacity?.maxGuests ?? venue.capacity?.maxGuests ?? 999999;
     }, [selectedPackage, venue]);
 
     const pricePerPlatePreview = useMemo(() => {
@@ -118,18 +113,8 @@ export default function BookingForm({
         return pricePerPlatePreview * Math.max(0, g);
     }, [pricePerPlatePreview, guests]);
 
-    const onSubmit = (values: BookingFormValues) => {
-        // extra capacity guard client-side (server still enforces)
-        if (values.guests < minGuests) {
-            toast.error(`Guests must be at least ${minGuests}`);
-            return;
-        }
-        if (values.guests > maxGuests) {
-            toast.error(`Guests must be at most ${maxGuests}`);
-            return;
-        }
-
-        const payload = {
+    const buildPayload = (values: BookingFormValues) => {
+        return {
             venueId: venue._id,
             packageId: values.packageId?.trim() ? values.packageId.trim() : undefined,
             eventDate: values.eventDate,
@@ -141,8 +126,26 @@ export default function BookingForm({
             contactEmail: values.contactEmail?.trim() ? values.contactEmail.trim() : undefined,
             note: values.note?.trim() ? values.note.trim() : undefined,
         };
+    };
 
-        startTransition(async () => {
+    const validateGuests = (values: BookingFormValues) => {
+        if (values.guests < minGuests) {
+            toast.error(`Guests must be at least ${minGuests}`);
+            return false;
+        }
+        if (values.guests > maxGuests) {
+            toast.error(`Guests must be at most ${maxGuests}`);
+            return false;
+        }
+        return true;
+    };
+
+    const onSubmit = (values: BookingFormValues) => {
+        if (!validateGuests(values)) return;
+
+        const payload = buildPayload(values);
+
+        startCreate(async () => {
             const res = await handleCreateBooking(payload);
 
             if (!res.success) {
@@ -154,6 +157,59 @@ export default function BookingForm({
             router.push("/user/activity");
         });
     };
+
+    const onPayNow = handleSubmit((values) => {
+        if (!validateGuests(values)) return;
+
+        const payload = buildPayload(values);
+
+        startPay(async () => {
+            // 1) create booking first
+            const createRes = await handleCreateBooking(payload);
+
+            if (!createRes.success) {
+                toast.error(createRes.message || "Create booking failed");
+                return;
+            }
+
+            const bookingId =
+                (createRes as any)?.data?._id ||
+                (createRes as any)?.data?.booking?._id ||
+                (createRes as any)?.booking?._id ||
+                (createRes as any)?._id;
+
+            if (!bookingId) {
+                toast.error("Booking created, but bookingId not returned from server");
+                router.push("/user/activity");
+                return;
+            }
+
+            const returnUrl = `${window.location.origin}/payment/success?bookingId=${bookingId}`;
+
+            const payRes = await handleInitiateKhaltiPayment({
+                bookingId: String(bookingId),
+                amount: Number(totalPricePreview), // rupees (backend converts to paisa)
+                returnUrl,
+            } as any);
+
+            if (!payRes.success) {
+                toast.error(payRes.message || "Failed to initiate payment");
+                router.push("/user/activity");
+                return;
+            }
+
+            const paymentUrl = payRes.data?.paymentUrl;
+            if (!paymentUrl) {
+                toast.error("Payment URL not received");
+                router.push("/user/activity");
+                return;
+            }
+
+            window.location.href = paymentUrl;
+        });
+    });
+
+    const disabledAll = pendingCreate || pendingPay;
 
     return (
         <div className="mx-auto max-w-3xl text-black">
@@ -175,7 +231,7 @@ export default function BookingForm({
                             const id = e.target.value;
                             setSelectedPackageId(id);
                             setValue("packageId", id);
-                            // keep guests within new min/max
+
                             const currentGuests = Number(watch("guests") || 0);
                             const nextMin =
                                 activePackages.find((p) => p._id === id)?.capacity?.minGuests ??
@@ -322,14 +378,31 @@ export default function BookingForm({
                         </p>
                     </div>
 
-                    {/* Submit */}
-                    <button
-                        disabled={pending}
-                        className="w-full rounded-xl bg-[#233041] px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
-                        type="submit"
-                    >
-                        {pending ? "Creating booking..." : "Confirm Booking"}
-                    </button>
+                    {/* Actions */}
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        {/* Create only */}
+                        <button
+                            disabled={disabledAll}
+                            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-50 disabled:opacity-60"
+                            type="submit"
+                        >
+                            {pendingCreate ? "Creating booking..." : "Confirm Booking"}
+                        </button>
+
+                        {/* Pay Now */}
+                        <button
+                            disabled={disabledAll}
+                            onClick={onPayNow}
+                            type="button"
+                            className="w-full rounded-xl bg-[#233041] px-4 py-3 text-sm font-semibold text-white hover:opacity-95 disabled:opacity-60"
+                        >
+                            {pendingPay ? "Redirecting to Khalti..." : "Confirm & Pay Now"}
+                        </button>
+                    </div>
+
+                    <p className="text-xs text-gray-500">
+                        “Confirm & Pay Now” will create your booking first, then redirect you to Khalti for payment.
+                    </p>
                 </form>
             </div>
         </div>
