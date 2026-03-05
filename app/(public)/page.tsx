@@ -24,7 +24,7 @@ function getImageUrl(files?: any): string {
   if (typeof file === "string" && file.startsWith("http")) return file;
 
   const cleaned = String(file).replace(/^\/+/, "");
-  if (!apiBase) return `/${cleaned}`; // last resort
+  if (!apiBase) return `/${cleaned}`;
   if (cleaned.startsWith("uploads/")) return `${apiBase}/${cleaned}`;
   return `${apiBase}/uploads/${cleaned}`;
 }
@@ -181,6 +181,7 @@ export default async function Home() {
             ))}
           </div>
         )}
+
         <HowItWorks />
       </section>
     </main>
