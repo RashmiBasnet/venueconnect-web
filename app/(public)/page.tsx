@@ -95,6 +95,48 @@ export default async function Home() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-10">
+        <div className="mt-12 flex items-end justify-between">
+          <h2 className="text-2xl font-semibold">Venues</h2>
+          <Link
+            href="/venues"
+            className="text-sm font-medium text-[#233041]/55 hover:text-[#233041]"
+          >
+            See All <span className="ml-1">›</span>
+          </Link>
+        </div>
+
+        {venues.length === 0 ? (
+          <div className="mt-5 rounded-2xl border border-[#233041]/10 bg-white p-6 text-sm text-[#233041]/60">
+            No venues found.
+          </div>
+        ) : (
+          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {venues.map((v: any) => (
+              <Link
+                key={v?._id ?? v?.name}
+                href={`/venues/${v?._id ?? ""}`}
+                className="group rounded-2xl border border-[#233041]/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <div className="relative h-40 w-full overflow-hidden rounded-t-2xl bg-[#EDE7E1]">
+                  <Image
+                    src={getImageUrl(v?.images)}
+                    alt={v?.name ?? "Venue"}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+
+                <div className="p-4">
+                  <h3 className="text-sm font-semibold">{v?.name ?? "Untitled Venue"}</h3>
+                  <p className="mt-1 whitespace-pre-line text-xs leading-relaxed text-[#233041]/55">
+                    {formatAddress(v) || "View venue details"}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+
         <div className="flex items-end justify-between">
           <h2 className="text-2xl font-semibold">Packages</h2>
           <Link
@@ -135,48 +177,6 @@ export default async function Home() {
                       ? `Starting at Rs. ${p.pricePerPlate} per plate`
                       : "View package details"}
                 </p>
-              </Link>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-12 flex items-end justify-between">
-          <h2 className="text-2xl font-semibold">Venues</h2>
-          <Link
-            href="/venues"
-            className="text-sm font-medium text-[#233041]/55 hover:text-[#233041]"
-          >
-            See All <span className="ml-1">›</span>
-          </Link>
-        </div>
-
-        {venues.length === 0 ? (
-          <div className="mt-5 rounded-2xl border border-[#233041]/10 bg-white p-6 text-sm text-[#233041]/60">
-            No venues found.
-          </div>
-        ) : (
-          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {venues.map((v: any) => (
-              <Link
-                key={v?._id ?? v?.name}
-                href={`/venues/${v?._id ?? ""}`}
-                className="group rounded-2xl border border-[#233041]/10 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-              >
-                <div className="relative h-40 w-full overflow-hidden rounded-t-2xl bg-[#EDE7E1]">
-                  <Image
-                    src={getImageUrl(v?.images)}
-                    alt={v?.name ?? "Venue"}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-
-                <div className="p-4">
-                  <h3 className="text-sm font-semibold">{v?.name ?? "Untitled Venue"}</h3>
-                  <p className="mt-1 whitespace-pre-line text-xs leading-relaxed text-[#233041]/55">
-                    {formatAddress(v) || "View venue details"}
-                  </p>
-                </div>
               </Link>
             ))}
           </div>
