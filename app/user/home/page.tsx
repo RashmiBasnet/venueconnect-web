@@ -52,7 +52,6 @@ export default async function Home() {
 
     return (
         <main className="min-h-screen bg-white text-[#233041]">
-            {/* Hero */}
             <section className="bg-white -mt-10">
                 <div className="mx-auto max-w-7xl px-6 pt-10 pb-8">
                     <div className="text-center">
@@ -66,9 +65,7 @@ export default async function Home() {
                 </div>
             </section>
 
-            {/* Content */}
             <section className="mx-auto max-w-7xl px-6 py-10">
-                {/* Venues */}
                 <div className="flex items-end justify-between">
                     <h2 className="text-2xl font-semibold">Venues</h2>
                     <Link
@@ -111,7 +108,6 @@ export default async function Home() {
                     </div>
                 )}
 
-                {/* Packages */}
                 <div className="mt-12 flex items-end justify-between">
                     <h2 className="text-2xl font-semibold">Packages</h2>
                     <Link

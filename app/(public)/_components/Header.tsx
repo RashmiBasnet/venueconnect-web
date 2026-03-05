@@ -25,10 +25,8 @@ export default function Header() {
 
   return (
     <header className="relative overflow-hidden h-50 bg-white">
-      {/* Background base color (so header still looks good while image loads) */}
       <div className="absolute inset-0 " />
 
-      {/* Wave background */}
       <div className="absolute inset-x-0 top-0 h-45 pointer-events-none">
         <svg
           className="h-full w-full"
@@ -53,10 +51,8 @@ export default function Header() {
         </svg>
       </div>
 
-      {/* Content on top */}
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-5">
         <div className="flex items-center justify-between">
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
             <div className="relative h-10 w-10 overflow-hidden rounded-md bg-white/90 shadow-sm">
               <Image
@@ -71,7 +67,6 @@ export default function Header() {
             </span>
           </Link>
 
-          {/* CENTER: Desktop Nav */}
           <div className="hidden md:flex gap-7 justify-center">
             {NAV_LINKS.map((link) => {
               const active = link.href === activeHref;
@@ -92,9 +87,7 @@ export default function Header() {
             })}
           </div>
 
-          {/* RIGHT: Auth + Icons */}
           <div className="flex items-center gap-2 justify-end">
-            {/* Desktop Auth */}
             <div className="hidden md:flex items-center gap-2">
               <Link
                 href="/login"
@@ -121,7 +114,6 @@ export default function Header() {
               </Link>
             </div>
 
-            {/* Account icon */}
             <button className="h-9 w-9 rounded-full bg-white/60 ring-1 ring-black/10 grid place-items-center text-[#2B3440] hover:bg-white/75">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path
@@ -137,7 +129,6 @@ export default function Header() {
               </svg>
             </button>
 
-            {/* Mobile Hamburger */}
             <button
               onClick={() => setOpen((v) => !v)}
               className="md:hidden h-9 w-9 rounded-full bg-white/60 ring-1 ring-black/10 grid place-items-center text-[#2B3440]"
@@ -155,7 +146,6 @@ export default function Header() {
           </div>
         </div>
 
-        {/* MOBILE MENU */}
         <div
           className={
             "md:hidden overflow-hidden transition-[max-height] duration-300 " +

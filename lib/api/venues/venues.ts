@@ -1,7 +1,6 @@
 import { API } from "../endpoints";
 import axios from "../axios";
 
-// PUBLIC VENUE APIS
 export const getAllVenues = async () => {
     try {
         const response = await axios.get(
@@ -32,7 +31,6 @@ export const getVenueById = async (venueId: string) => {
     }
 };
 
-// ADMIN VENUE APIS
 export const createVenue = async (formData: FormData) => {
     try {
         const response = await axios.post(
@@ -85,7 +83,6 @@ export const deleteVenue = async (venueId: string) => {
     }
 };
 
-// ADMIN VENUE IMAGE APIS
 export const replaceVenueImages = async (
     venueId: string,
     formData: FormData

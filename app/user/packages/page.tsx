@@ -32,7 +32,6 @@ export default async function Page({
 
     return (
         <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-            {/* Title */}
             <div className="-mt-10 mb-8 text-center">
                 <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
                     Packages
@@ -42,15 +41,12 @@ export default async function Page({
                 </p>
             </div>
 
-            {/* Search  */}
             <div className="mx-auto mb-8 w-full max-w-4xl">
                 <PackageSearchBar initialSearch={search} />
             </div>
 
-            {/* Grid */}
             <PackagesGrid packages={res.packages || []} />
 
-            {/* Pagination */}
             {!!res.pagination && (
                 <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="text-sm text-slate-600">

@@ -27,12 +27,10 @@ export default function ProfileForm({
 
     return (
         <section className="relative py-10">
-            {/* Background */}
             <div className="pointer-events-none absolute inset-0 -z-10 bg-[#F4F1EE]" />
             <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-56 bg-linear-to-b from-[#C4B6AB]/60 to-transparent" />
 
             <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-                {/* Header */}
                 <div className="mb-6">
                     <h1 className="mt-3 text-2xl sm:text-3xl font-semibold text-[#233041]">
                         Profile
@@ -42,10 +40,8 @@ export default function ProfileForm({
                     </p>
                 </div>
 
-                {/* Card */}
                 <div className="rounded-2xl border border-black/10 bg-white/90 shadow-sm backdrop-blur overflow-hidden">
                     <div className="grid md:grid-cols-[280px_1fr]">
-                        {/* Left: Avatar */}
                         <div className="border-b md:border-b-0 md:border-r border-black/10 p-6 sm:p-8">
                             <div className="flex flex-col items-center md:items-start">
                                 <div className="h-28 w-28 sm:h-32 sm:w-32 overflow-hidden rounded-full bg-[#F4F1EE] ring-1 ring-black/10">
@@ -73,7 +69,6 @@ export default function ProfileForm({
                                     Manage your profile details anytime.
                                 </p>
 
-                                {/* Update button */}
                                 <Link
                                     href="/user/profile/update-profile"
                                     className="mt-5 inline-flex items-center gap-2 rounded-xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-[#233041] hover:bg-black/2"
@@ -84,7 +79,6 @@ export default function ProfileForm({
                             </div>
                         </div>
 
-                        {/* Right: Details */}
                         <div className="p-6 sm:p-8">
                             <p className="text-sm font-semibold text-[#233041]">
                                 Profile details

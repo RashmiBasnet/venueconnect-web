@@ -79,7 +79,6 @@ export default function ActivityClient() {
 
     return (
         <div className="space-y-4">
-            {/* Tabs */}
             <div className="flex flex-wrap gap-2">
                 {TABS.map((t) => {
                     const active = t.key === tab;
@@ -104,7 +103,6 @@ export default function ActivityClient() {
                 })}
             </div>
 
-            {/* Content */}
             <div className="space-y-3">
                 {loading || pending ? (
                     <div className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">

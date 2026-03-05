@@ -16,7 +16,6 @@ export const handleCreateBooking = async (data: any) => {
         const result = await createBooking(data);
 
         if (result.success) {
-            // user booking pages
             revalidatePath("/user/activity");
             revalidatePath("/user");
 

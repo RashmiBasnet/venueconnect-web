@@ -26,9 +26,7 @@ export const handleUpdateUserProfile = async (formData: any) => {
     try {
         const result = await updateUserProfile(formData);
         if (result.success) {
-            // update user data in cookie
             await setUserData(result.data);
-            // revalidate user profile page
             revalidatePath("/user/update-profile");
             return {
                 success: true,

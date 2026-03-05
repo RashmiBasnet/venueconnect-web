@@ -77,7 +77,6 @@ export default function BookingDetailsClient({ booking }: { booking: BookingUI }
 
     return (
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8">
-            {/* Top bar */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold text-gray-900">Booking Details</h1>
@@ -97,10 +96,8 @@ export default function BookingDetailsClient({ booking }: { booking: BookingUI }
             </div>
 
             <div className="mt-6 grid gap-4 lg:grid-cols-12">
-                {/* LEFT: Main card */}
                 <div className="lg:col-span-8">
                     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-                        {/* Image */}
                         <div className="relative h-56 w-full bg-gray-100">
                             <Image
                                 src={getImageUrl(img)}
@@ -111,7 +108,6 @@ export default function BookingDetailsClient({ booking }: { booking: BookingUI }
                             />
                         </div>
 
-                        {/* Content */}
                         <div className="p-6">
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                 <div>
@@ -140,7 +136,6 @@ export default function BookingDetailsClient({ booking }: { booking: BookingUI }
                                 </div>
                             </div>
 
-                            {/* Details grid */}
                             <div className="mt-6 grid gap-3 sm:grid-cols-2">
                                 <InfoRow label="Event Date" value={formatEventDate(booking.eventDate)} />
                                 <InfoRow
@@ -156,7 +151,6 @@ export default function BookingDetailsClient({ booking }: { booking: BookingUI }
                                 <InfoRow label="Total" value={formatMoney(booking.totalPrice)} />
                             </div>
 
-                            {/* Pay area */}
                             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <div className="text-sm text-gray-600">
                                     {isPaid ? (
@@ -186,7 +180,6 @@ export default function BookingDetailsClient({ booking }: { booking: BookingUI }
                                 </button>
                             </div>
 
-                            {/* tiny hint */}
                             {isUnpaid ? (
                                 <p className="mt-3 text-xs text-gray-500">
                                     Payment link expires quickly (Khalti test). If it expires, press “Pay with Khalti” again to generate a new one.
@@ -196,7 +189,6 @@ export default function BookingDetailsClient({ booking }: { booking: BookingUI }
                     </div>
                 </div>
 
-                {/* RIGHT: Summary card */}
                 <div className="lg:col-span-4">
                     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                         <h3 className="text-sm font-semibold text-gray-900">Summary</h3>

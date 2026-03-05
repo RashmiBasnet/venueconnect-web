@@ -151,7 +151,6 @@ export default function UpdateUserForm({ user }: { user: any }) {
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 text-start">
             <div className="rounded-2xl border border-black/10 bg-white/90 shadow-sm backdrop-blur p-6 sm:p-8">
-                {/* Avatar */}
                 <div className="flex flex-col items-center text-center">
                     <Controller
                         name="profilePicture"
@@ -251,7 +250,6 @@ export default function UpdateUserForm({ user }: { user: any }) {
                     />
                 </div>
 
-                {/* Full Name */}
                 <div className="mt-8">
                     <label className={labelCls}>Full Name</label>
                     <div className={fieldWrap}>
@@ -267,7 +265,6 @@ export default function UpdateUserForm({ user }: { user: any }) {
                     ) : null}
                 </div>
 
-                {/* Email */}
                 <div className="mt-5">
                     <label className={labelCls}>Email</label>
                     <div className={fieldWrap}>
@@ -284,7 +281,6 @@ export default function UpdateUserForm({ user }: { user: any }) {
                     ) : null}
                 </div>
 
-                {/* Submit */}
                 <button
                     type="submit"
                     disabled={isSubmitting}

@@ -40,11 +40,9 @@ export default function ResetPasswordForm({ token }: { token: string }) {
 
   return (
     <div className="relative min-h-full p-8 sm:p-12">
-      {/* subtle theme background */}
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[#F4F1EE]" />
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-56 bg-linear-to-b from-[#C4B6AB]/70 to-transparent" />
 
-      {/* Back button */}
       <NextLink
         href="/"
         className="absolute left-6 top-6 inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/80 backdrop-blur hover:bg-white"
@@ -53,7 +51,6 @@ export default function ResetPasswordForm({ token }: { token: string }) {
       </NextLink>
 
       <div className="mx-auto max-w-md pt-10">
-        {/* Card */}
         <div className="rounded-2xl border border-black/10 bg-white/90 p-7 shadow-sm backdrop-blur sm:p-8">
           <div className="text-center">
             <div className="mx-auto mb-3 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1 text-xs font-semibold text-[#233041]">
@@ -70,7 +67,6 @@ export default function ResetPasswordForm({ token }: { token: string }) {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-7 space-y-5">
-            {/* Password */}
             <div>
               <label className="text-sm font-medium text-[#233041]">
                 New Password
@@ -102,7 +98,6 @@ export default function ResetPasswordForm({ token }: { token: string }) {
               )}
             </div>
 
-            {/* Confirm Password */}
             <div>
               <label className="text-sm font-medium text-[#233041]">
                 Confirm New password
@@ -154,7 +149,6 @@ export default function ResetPasswordForm({ token }: { token: string }) {
           </form>
         </div>
 
-        {/* tiny footer note */}
         <p className="mt-4 text-center text-xs text-black/45">
           Tip: use a mix of letters, numbers, and symbols.
         </p>

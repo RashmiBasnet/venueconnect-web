@@ -24,7 +24,6 @@ export default function BookingCard({ booking }: { booking: BookingUI }) {
 
     return (
         <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-            {/* Image (Top) */}
             <div className="relative h-48 w-full bg-gray-100">
                 <Image
                     src={getImageUrl(img)}
@@ -35,7 +34,6 @@ export default function BookingCard({ booking }: { booking: BookingUI }) {
                 />
             </div>
 
-            {/* Content */}
             <div className="p-4 space-y-4">
                 <div>
                     <h3 className="text-lg font-semibold text-gray-900">
@@ -47,7 +45,6 @@ export default function BookingCard({ booking }: { booking: BookingUI }) {
                     </p>
                 </div>
 
-                {/* Status badges */}
                 <div className="flex flex-wrap gap-2">
                     <span
                         className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset ${statusBadgeClass(
@@ -65,7 +62,6 @@ export default function BookingCard({ booking }: { booking: BookingUI }) {
                     </span>
                 </div>
 
-                {/* Details  */}
                 <div className="space-y-2 text-sm">
                     <div className="flex justify-between rounded-xl bg-gray-50 px-3 py-2">
                         <span className="text-gray-500">Event Date</span>
@@ -106,7 +102,6 @@ export default function BookingCard({ booking }: { booking: BookingUI }) {
                     </div>
                 </div>
 
-                {/* Actions */}
                 <div className="pt-2">
                     <Link
                         href={`/user/booking/${booking._id}`}

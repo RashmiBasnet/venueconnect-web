@@ -27,7 +27,6 @@ export default function PackageCard({ pkg }: { pkg: any }) {
     return (
         <article className="group overflow-hidden rounded-2xl border border-black/10 bg-white shadow-sm transition hover:shadow-md">
             <div className="grid grid-cols-1 md:grid-cols-[240px_1fr]">
-                {/* Image */}
                 <div className="relative h-48 w-full md:h-full">
                     <Image
                         src={img}
@@ -46,7 +45,6 @@ export default function PackageCard({ pkg }: { pkg: any }) {
                     </div>
                 </div>
 
-                {/* Content */}
                 <div className="p-5 md:p-6 flex flex-col">
                     <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
@@ -73,12 +71,10 @@ export default function PackageCard({ pkg }: { pkg: any }) {
                         )}
                     </div>
 
-                    {/* Description */}
                     <p className="mt-4 line-clamp-3 text-sm leading-6 text-slate-700">
                         {pkg?.description || "No description available."}
                     </p>
 
-                    {/* Meta */}
                     <div className="mt-4 flex flex-wrap items-center gap-2">
                         {Array.isArray(pkg?.inclusions) && pkg.inclusions.length ? (
                             <span className="rounded-full border border-black/10 bg-gray-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
@@ -87,7 +83,6 @@ export default function PackageCard({ pkg }: { pkg: any }) {
                         ) : null}
                     </div>
 
-                    {/* Actions */}
                     <div className="mt-auto pt-6 flex justify-end">
                         <Link
                             href={`/user/packages/${pkg._id}`}

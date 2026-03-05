@@ -6,7 +6,6 @@ export default function AboutPage() {
     return (
         <main className="relative min-h-[calc(100vh-80px)] bg-white">
             <section className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
-                {/* main card */}
                 <div className="-mt-15 rounded-4xl border border-black/10 bg-white/80 p-8 sm:p-12 shadow-[0_14px_45px_-20px_rgba(0,0,0,0.28)] backdrop-blur">
                     <h1 className="text-4xl font-semibold tracking-tight text-black sm:text-5xl">
                         Making venue discovery and booking{" "}
@@ -18,7 +17,6 @@ export default function AboutPage() {
                         event with clarity—without endless calls or confusing pricing.
                     </p>
 
-                    {/* focus box */}
                     <div className="mt-10 rounded-3xl border border-black/10 bg-black/2 p-6 sm:p-7">
                         <div className="flex items-center justify-between gap-3">
                             <h2 className="text-sm font-semibold text-black">
@@ -57,7 +55,6 @@ export default function AboutPage() {
                         </ul>
                     </div>
 
-                    {/* actions */}
                     <div className="mt-10 flex flex-col gap-4 sm:flex-row">
                         <Link
                             href="/"
@@ -76,7 +73,6 @@ export default function AboutPage() {
                     </div>
                 </div>
 
-                {/* tiny footer */}
                 <div className="mt-12 flex items-center justify-between text-xs text-black/50">
                     <span>© {new Date().getFullYear()} VenueConnect</span>
                     <span className="hidden sm:inline">

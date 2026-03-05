@@ -23,11 +23,9 @@ export default function HowItWorks() {
         <section className="bg-white py-16">
             <div className="mx-auto max-w-7xl px-6">
                 <div className="relative overflow-visible rounded-4xl bg-white">
-                    {/* Background soft circles */}
                     <div className="pointer-events-none absolute -left-30 -bottom-25 h-100 w-100 rounded-full bg-[#EEF4FF] opacity-60" />
                     <div className="pointer-events-none absolute -right-32 -top-10 h-100 w-100 rounded-full bg-[#EEF4FF] opacity-60" />
 
-                    {/* Top text */}
                     <div className="relative grid gap-10 lg:grid-cols-2">
                         <div className="pt-6 lg:pt-2">
                             <h2 className="text-4xl font-extrabold tracking-tight text-[#233041]">
@@ -46,9 +44,7 @@ export default function HowItWorks() {
                         <div className="hidden lg:block" />
                     </div>
 
-                    {/* Desktop (1280 tuned) */}
                     <div className="relative hidden min-h-130 lg:block">
-                        {/* Golden curve */}
                         <svg
                             className="pointer-events-none absolute left-0 top-0 h-full w-full"
                             viewBox="0 0 1280 520"
@@ -66,7 +62,6 @@ export default function HowItWorks() {
                             />
                         </svg>
 
-                        {/* Soft shadow under curve */}
                         <svg
                             className="pointer-events-none absolute left-0 top-0 h-full w-full opacity-25 blur-[2px]"
                             viewBox="0 0 1280 520"
@@ -84,7 +79,6 @@ export default function HowItWorks() {
                             />
                         </svg>
 
-                        {/* Nodes */}
                         <div className="absolute left-35 top-75">
                             <div className="grid h-16 w-16 place-items-center rounded-2xl bg-white shadow-lg">
                                 <div className="h-6 w-6 rounded-full bg-[#BDBDBD]" />
@@ -103,7 +97,6 @@ export default function HowItWorks() {
                             </div>
                         </div>
 
-                        {/* Big faded numbers */}
                         <div className="pointer-events-none absolute left-45 top-90 text-[140px] font-extrabold text-[#233041]/10">
                             1
                         </div>
@@ -114,7 +107,6 @@ export default function HowItWorks() {
                             3
                         </div>
 
-                        {/* Step text blocks */}
                         <div className="absolute left-27.5 top-95 max-w-75">
                             <h3 className="text-lg font-extrabold text-[#233041]">
                                 Search for a Venue
@@ -148,7 +140,6 @@ export default function HowItWorks() {
                         </div>
                     </div>
 
-                    {/* Mobile fallback */}
                     <div className="mt-10 grid gap-6 lg:hidden">
                         {steps.map((s) => (
                             <div

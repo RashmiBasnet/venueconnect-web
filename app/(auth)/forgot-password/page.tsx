@@ -37,7 +37,6 @@ export default function Page() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Theme background */}
       <div className="absolute inset-0 bg-[#F4F1EE]" />
       <div className="absolute inset-x-0 top-0 h-72 bg-linear-to-b from-[#C4B6AB]/80 to-transparent" />
       <div className="pointer-events-none absolute -bottom-40 left-1/2 h-130 w-130 -translate-x-1/2 rounded-full bg-[#233041]/5 blur-3xl" />
@@ -45,10 +44,8 @@ export default function Page() {
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-12">
         <div className="w-full max-w-5xl overflow-hidden rounded-3xl bg-white/90 backdrop-blur shadow-[0_20px_60px_rgba(0,0,0,0.18)] border border-black/10">
           <div className="grid lg:grid-cols-2">
-            {/* LEFT: Visual panel */}
             <div className="relative hidden lg:block min-h-120 bg-[#F4F1EE]">
 
-              {/* Illustration */}
               <div className="relative h-full flex items-center justify-center overflow-visible p-10">
                 <Image
                   src="/images/forgot.png"
@@ -61,9 +58,7 @@ export default function Page() {
               </div>
             </div>
 
-            {/* RIGHT: Form */}
             <div className="relative p-8 sm:p-12">
-              {/* Back button */}
               <NextLink
                 href="/"
                 className="absolute left-6 top-6 inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/80 backdrop-blur hover:bg-white"
@@ -83,7 +78,6 @@ export default function Page() {
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
-                  {/* Email */}
                   <div>
                     <label className="text-sm font-medium text-[#233041]">
                       Email address

@@ -53,7 +53,6 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-white text-[#233041]">
-      {/* Hero */}
       <section className="bg-white -mt-10">
         <div className="mx-auto max-w-7xl px-6 pt-10 pb-8">
           <div className="text-center">
@@ -65,7 +64,6 @@ export default async function Home() {
             </p>
           </div>
 
-          {/* Search */}
           <div className="mx-auto mt-7 max-w-3xl">
             <div className="flex items-center gap-3 rounded-xl border border-[#233041]/15 bg-white px-4 py-3 shadow-sm">
               <input
@@ -96,9 +94,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Content */}
       <section className="mx-auto max-w-7xl px-6 py-10">
-        {/* Packages */}
         <div className="flex items-end justify-between">
           <h2 className="text-2xl font-semibold">Packages</h2>
           <Link
@@ -144,7 +140,6 @@ export default async function Home() {
           </div>
         )}
 
-        {/* Venues */}
         <div className="mt-12 flex items-end justify-between">
           <h2 className="text-2xl font-semibold">Venues</h2>
           <Link
@@ -186,8 +181,6 @@ export default async function Home() {
             ))}
           </div>
         )}
-
-        {/* How it works */}
         <HowItWorks />
       </section>
     </main>

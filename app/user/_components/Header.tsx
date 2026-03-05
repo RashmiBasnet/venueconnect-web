@@ -25,7 +25,6 @@ export default function Header() {
         <header className="relative overflow-hidden h-50 bg-white">
             <div className="absolute inset-0 " />
 
-            {/* Wave background */}
             <div className="absolute inset-x-0 top-0 h-45 pointer-events-none">
                 <svg
                     className="h-full w-full"
@@ -50,10 +49,8 @@ export default function Header() {
                 </svg>
             </div>
 
-            {/* Content on top */}
             <div className="relative z-10 mx-auto max-w-7xl px-6 py-5">
                 <div className="flex items-center justify-between">
-                    {/* Logo */}
                     <Link href="/" className="flex items-center gap-3">
                         <div className="relative h-10 w-10 overflow-hidden rounded-md bg-white/90 shadow-sm">
                             <Image
@@ -68,7 +65,6 @@ export default function Header() {
                         </span>
                     </Link>
 
-                    {/* Center: Desktop Nav */}
                     <div className="hidden md:flex items-center gap-6 justify-self-center">
                         {NAV_LINKS.map((link) => (
                             <Link
@@ -86,7 +82,6 @@ export default function Header() {
                         ))}
                     </div>
 
-                    {/* Right: Auth */}
                     <div className="flex items-center gap-3 justify-self-end">
                         <Link href={"/user/profile"}>
                             <span className="text-xs text-black font-semibold">
